@@ -1,10 +1,18 @@
 <template>
   <div class="customer-create-page q-pa-md">
-    <div class="text-h5 q-mb-md">{{ t('customer.create.title') }}</div>
-    
+    <!-- Dynamic Title -->
+    <div v-if="!isEditMode" class="text-h5 q-mb-md">
+      {{ t('customer.create.title') }}
+    </div>
+
+    <div v-if="isEditMode" class="text-h5 q-mb-md">
+      {{ t('customer.edit.title') }}
+    </div>
+
     <QCard class="customer-form">
       <QCardSection>
         <QForm @submit="handleSubmit" class="q-gutter-md">
+          <!-- Customer Form Fields -->
           <div class="row q-col-gutter-md">
             <div class="col-12 col-md-6">
               <QInput
@@ -16,6 +24,7 @@
                 lazy-rules
               />
             </div>
+
             <div class="col-12 col-md-6">
               <QInput
                 v-model="formData.code"
@@ -24,8 +33,10 @@
                 outlined
                 dense
                 lazy-rules
+                :disable="isEditMode"
               />
             </div>
+
             <div class="col-12 col-md-6">
               <QSelect
                 v-model="formData.region"
@@ -39,6 +50,7 @@
                 lazy-rules
               />
             </div>
+
             <div class="col-12 col-md-6">
               <QSelect
                 v-model="formData.status"
@@ -52,6 +64,7 @@
                 lazy-rules
               />
             </div>
+
             <div class="col-12">
               <QInput
                 v-model="formData.address"
@@ -77,6 +90,7 @@
                 lazy-rules
               />
             </div>
+
             <div class="col-12 col-md-6">
               <QInput
                 v-model="formData.email"
@@ -91,6 +105,7 @@
                 lazy-rules
               />
             </div>
+
             <div class="col-12 col-md-6">
               <QInput
                 v-model="formData.phone"
@@ -103,6 +118,7 @@
             </div>
           </div>
 
+          <!-- Action Buttons -->
           <div class="row q-mt-lg">
             <div class="col-12 flex justify-end q-gutter-sm">
               <QBtn
@@ -119,6 +135,7 @@
               />
             </div>
           </div>
+
         </QForm>
       </QCardSection>
     </QCard>
@@ -126,19 +143,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import { CustomerStatus } from '@/models/customer.model';
 import { useCustomerStore } from '@/stores/customer.store';
 
+// Hooks
 const router = useRouter();
+const route = useRoute();
 const { t } = useI18n();
 const $q = useQuasar();
 const customerStore = useCustomerStore();
 
+// State
 const loading = ref(false);
+const isEditMode = computed(() => route.path.includes('/customers/edit'));
 
 const formData = ref({
   name: '',
@@ -148,42 +169,78 @@ const formData = ref({
   address: '',
   contactPerson: '',
   email: '',
-  phone: ''
+  phone: '',
 });
 
+// Select Options
 const regionOptions = computed(() => [
   { label: t('customer.regions.north'), value: 'North' },
   { label: t('customer.regions.south'), value: 'South' },
   { label: t('customer.regions.east'), value: 'East' },
-  { label: t('customer.regions.west'), value: 'West' }
+  { label: t('customer.regions.west'), value: 'West' },
 ]);
 
 const statusOptions = computed(() => [
   { label: t('customer.status.active'), value: CustomerStatus.Active },
   { label: t('customer.status.inactive'), value: CustomerStatus.Inactive },
-  { label: t('customer.status.pending'), value: CustomerStatus.Pending }
+  { label: t('customer.status.pending'), value: CustomerStatus.Pending },
 ]);
 
+const fetchCustomer = async () => {
+  if (isEditMode.value) {
+    try {
+      loading.value = true;
+      const customer = await customerStore.fetchCustomerById(route.params.id);
+      if (customer) {
+        formData.value = { ...customer };
+      }
+    } catch (error) {
+      $q.notify({
+        type: 'negative',
+        message: t('customer.fetch.error'),
+      });
+    } finally {
+      loading.value = false;
+    }
+  }
+};
+
+onMounted(fetchCustomer);
+
+// Handle form submission
 const handleSubmit = async () => {
   try {
     loading.value = true;
-    await customerStore.createCustomer(formData.value);
-    
-    $q.notify({
-      type: 'positive',
-      message: t('customer.create.success')
-    });
-    
+
+    if (isEditMode.value) {
+      const id = route.params.id;
+      const updates  = formData.value;
+       await customerStore.updateCustomer(id, updates);
+      $q.notify({
+        type: 'positive',
+        message: t('customer.edit.success'),
+      });
+    } else {
+      await customerStore.createCustomer(formData.value);
+      $q.notify({
+        type: 'positive',
+        message: t('customer.create.success'),
+      });
+    }
+
     router.push({ name: 'customer-list' });
   } catch (error) {
     $q.notify({
       type: 'negative',
-      message: t('customer.create.error')
+      message: isEditMode.value
+        ? t('customer.edit.error')
+        : t('customer.create.error'),
     });
   } finally {
     loading.value = false;
   }
 };
+
 </script>
 
 <style lang="scss" scoped>
@@ -196,4 +253,4 @@ const handleSubmit = async () => {
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
   }
 }
-</style> 
+</style>

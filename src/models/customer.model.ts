@@ -83,25 +83,25 @@ export interface ICustomer {
 /**
  * Interface representing a customer entity
  */
-export interface ICustomer {
-  id: number;
-  code: string;
-  name: string;
-  industry: string;
-  region: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  status: CustomerStatus;
-  isActive: boolean;
-  createdAt: Date;
-  modifiedAt: Date | null;
-  contacts: IContact[];
-  contracts: IContract[];
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-}
+// export interface ICustomer {
+//   id: number;
+//   code: string;
+//   name: string;
+//   industry: string;
+//   region: string;
+//   address: string;
+//   city: string;
+//   state: string;
+//   postalCode: string;
+//   country: string;
+//   status: CustomerStatus;
+//   isActive: boolean;
+//   createdAt: Date;
+//   modifiedAt: Date | null;
+//   contacts: IContact[];
+//   contracts: IContract[];
+//   location: {
+//     latitude: number;
+//     longitude: number;
+//   };
+// }

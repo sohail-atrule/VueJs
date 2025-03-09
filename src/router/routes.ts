@@ -89,9 +89,9 @@ export const default_routes: RouteRecordRaw[] = [
               layout: 'default',
             },
           },
-          {
-            path: 'edit',
-            name: 'customer-edit',
+          { 
+            path: 'edit/:id',
+            name: 'edit-customer',
             component: () => import('../pages/customers/CustomerCreatePage.vue' as any),
             meta: {
               requiresAuth: true,

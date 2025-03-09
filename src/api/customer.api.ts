@@ -33,6 +33,10 @@ interface CustomerParams {
   sortOrder?: 'asc' | 'desc';
 }
 
+
+
+const Base_Url = 'http://192.168.10.154:5235/api/v1';
+
 /**
  * Retrieves a paginated and filtered list of customers
  * @param params Query parameters for filtering and pagination
@@ -44,7 +48,7 @@ interface CustomerParams {
 // };
 
 export const getCustomers = async (): Promise<CustomerApiResponse> => {
-  const response = await axios.get('http://192.168.10.154:5235/api/v1/Customers?region=North&page=1&pageSize=20');
+  const response = await axios.get(`${Base_Url}/Customers?region=North&page=1&pageSize=20`);
   return response.data;
 };
 
@@ -78,7 +82,8 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
     return cached.data;
   }
 
-  const response = await api.get(`/v1/customers/${id}`);
+  // const response = await api.get(`/v1/customers/${id}`);
+  const response = await axios.get(`${Base_Url}/Customers/${id}`);
   cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
   return response.data;
 };
@@ -95,7 +100,7 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
 // };
 
 export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt' | 'modifiedAt'>): Promise<ICustomer> => {
-  const response = await axios.post('http://192.168.10.154:5235/api/v1/Customers', customer);
+  const response = await axios.post(`${Base_Url}/Customers`, customer);
   invalidateCustomerCache();
   return response.data;
 };
@@ -106,8 +111,9 @@ export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt
  * @param customer Updated customer data
  * @returns Promise resolving to updated customer
  */
-export const updateCustomer = async (id: number, updates: Partial<ICustomer>): Promise<ICustomer> => {
-  const response = await api.put(`/v1/customers/${id}`, updates);
+export const updateCustomer = async (id: number, updates: Partial<any>): Promise<ICustomer> => {
+  // const response = await api.put(`/v1/customers/${id}`, updates);
+  const response = await axios.put(`${Base_Url}/Customers/${id}`, updates);
   invalidateCustomerCache(id);
   return response.data;
 };
@@ -118,7 +124,8 @@ export const updateCustomer = async (id: number, updates: Partial<ICustomer>): P
  * @returns Promise resolving to void
  */
 export const deleteCustomer = async (id: number): Promise<void> => {
-  await api.delete(`/v1/customers/${id}`);
+  // await api.delete(`/v1/customers/${id}`);
+  await axios.delete(`${Base_Url}/Customers/${id}`);
   invalidateCustomerCache(id);
 };
 

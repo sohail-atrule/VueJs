@@ -64,7 +64,7 @@ interface CustomerState {
  * Pinia store for managing customer state
  */
 export const useCustomerStore = defineStore('customer', {
-  state: (): CustomerState => ({
+  state: (): any => ({
     customers: new Map(),
     loading: false,
     error: null,
@@ -175,14 +175,16 @@ export const useCustomerStore = defineStore('customer', {
     /**
      * Fetches a single customer
      */
-    async fetchCustomerById(id: number): Promise<void> {
+    async fetchCustomerById(id: number): Promise<any> {
       try {
         this.loading = true;
         this.error = null;
-
         const customer = await customerApi.getCustomerById(id);
-        this.customers.set(customer.id, customer);
-        this.selectedCustomerId = customer.id;
+        // this.customers.set(customer.id, customer);
+        // this.selectedCustomerId = customer.id;
+
+        console.log("customer in store file", customer);
+        return customer;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Failed to fetch customer details';
         useNotificationStore().error(this.error);
@@ -194,7 +196,7 @@ export const useCustomerStore = defineStore('customer', {
     /**
      * Creates a new customer
      */
-    async createCustomer(customer: Omit<ICustomer, 'id' | 'createdAt' | 'modifiedAt'>): Promise<void> {
+    async createCustomer(customer: Omit<any, 'id' | 'createdAt' | 'modifiedAt'>): Promise<void> {
       try {
         this.loading = true;
         this.error = null;
@@ -215,26 +217,30 @@ export const useCustomerStore = defineStore('customer', {
     /**
      * Updates customer
      */
-    async updateCustomer(id: number, updates: Partial<ICustomer>): Promise<void> {
-      const previousData = this.customers.get(id);
-      if (!previousData) return;
 
+
+    async updateCustomer(id: number, updates: Partial<any>): Promise<void> {
+      // const previousData = this.customers.get(id);
+      // if (!previousData) return;
+
+
+      console.log("id in store file", updates);
       try {
         this.loading = true;
         this.error = null;
 
         // Optimistic update
-        this.customers.set(id, { ...previousData, ...updates });
+        // this.customers.set(id, { ...previousData, ...updates });
 
-        const updatedCustomer = await customerApi.updateCustomer(id, updates);
-        this.customers.set(id, updatedCustomer);
+         await customerApi.updateCustomer(id, updates);
+        //  this.customers.set(id, updatedCustomer);
         
         useNotificationStore().success('Customer updated successfully');
       } catch (error) {
         // Rollback on error
-        if (previousData) {
-          this.customers.set(id, previousData);
-        }
+        // if (previousData) {
+        //   this.customers.set(id, previousData);
+        // }
         this.error = error instanceof Error ? error.message : 'Failed to update customer';
         useNotificationStore().error(this.error);
         throw error;

@@ -19,8 +19,8 @@ const ROLE_ID_MAP = {
 interface AuthResponse {
     tokens: AuthToken;
     user: IUser;
-    // requiresMfa?: boolean;
-    // mfaChallenge?: MfaChallenge;
+    requiresMfa?: boolean;
+    mfaChallenge?: MfaChallenge;
 }
 
 interface TestUser {
@@ -30,88 +30,88 @@ interface TestUser {
     roleId: number;
 }
 
-// // Test users mapping for different roles
-// const TEST_USERS: Record<string, TestUser> = {
-//     'admin@test.com': {
-//         id: 1,
-//         firstName: 'Admin',
-//         lastName: 'User',
-//         roleId: ROLE_ID_MAP[UserRoleType.Admin]
-//     },
-//     'operations@test.com': {
-//         id: 2,
-//         firstName: 'Operations',
-//         lastName: 'User',
-//         roleId: ROLE_ID_MAP[UserRoleType.Operations]
-//     },
-//     'inspector@test.com': {
-//         id: 3,
-//         firstName: 'Inspector',
-//         lastName: 'User',
-//         roleId: ROLE_ID_MAP[UserRoleType.Inspector]
-//     },
-//     'customer.service@test.com': {
-//         id: 4,
-//         firstName: 'Customer Service',
-//         lastName: 'User',
-//         roleId: ROLE_ID_MAP[UserRoleType.CustomerService]
-//     }
-// };
+// Test users mapping for different roles
+const TEST_USERS: Record<string, TestUser> = {
+    'admin@test.com': {
+        id: 1,
+        firstName: 'Admin',
+        lastName: 'User',
+        roleId: ROLE_ID_MAP[UserRoleType.Admin]
+    },
+    'operations@test.com': {
+        id: 2,
+        firstName: 'Operations',
+        lastName: 'User',
+        roleId: ROLE_ID_MAP[UserRoleType.Operations]
+    },
+    'inspector@test.com': {
+        id: 3,
+        firstName: 'Inspector',
+        lastName: 'User',
+        roleId: ROLE_ID_MAP[UserRoleType.Inspector]
+    },
+    'customer.service@test.com': {
+        id: 4,
+        firstName: 'Customer Service',
+        lastName: 'User',
+        roleId: ROLE_ID_MAP[UserRoleType.CustomerService]
+    }
+};
 
 export async function performAzureAuth(credentials: LoginCredentials): Promise<AuthResponse> {
  
 
     // TODO: Implement actual Azure AD B2C authentication
-  try {
-    const response = await axios.post('http://192.168.10.154:5235/api/v1/auth/login', credentials);
-    console.log(response);
-    return response.data as AuthResponse;
-  } catch (error) {
-    console.log(error);
-    throw new Error('Authentication failed');
-  }
+//   try {
+//     const response = await axios.post('http://192.168.10.154:5235/api/v1/auth/login', credentials);
+//     console.log(response);
+//     return response.data as AuthResponse;
+//   } catch (error) {
+//     console.log(error);
+//     throw new Error('Authentication failed');
+//   }
 
-    // // // Check if the email exists in our test users
-    // const testUser = TEST_USERS[credentials.email];
+    // // Check if the email exists in our test users
+    const testUser = TEST_USERS[credentials.email];
 
-    // if (!testUser) {
-    //     throw new Error('Invalid credentials. Please use one of the test emails: admin@test.com, operations@test.com, inspector@test.com, or customer.service@test.com');
-    // }
+    if (!testUser) {
+        throw new Error('Invalid credentials. Please use one of the test emails: admin@test.com, operations@test.com, inspector@test.com, or customer.service@test.com');
+    }
 
-    // // Generate tokens with longer expiration (24 hours)
-    // const expiresIn = 24 * 60 * 60; // 24 hours in seconds
-    // const tokens = {
-    //     accessToken: 'dummy_access_token_' + Date.now(),
-    //     refreshToken: 'dummy_refresh_token_' + Date.now(),
-    //     idToken: 'dummy_id_token_' + Date.now(),
-    //     tokenType: 'Bearer',
-    //     scope: ['openid', 'profile'],
-    //     expiresIn: expiresIn,
-    //     expiresAt: new Date(Date.now() + expiresIn * 1000)
-    // };
+    // Generate tokens with longer expiration (24 hours)
+    const expiresIn = 24 * 60 * 60; // 24 hours in seconds
+    const tokens = {
+        accessToken: 'dummy_access_token_' + Date.now(),
+        refreshToken: 'dummy_refresh_token_' + Date.now(),
+        idToken: 'dummy_id_token_' + Date.now(),
+        tokenType: 'Bearer',
+        scope: ['openid', 'profile'],
+        expiresIn: expiresIn,
+        expiresAt: new Date(Date.now() + expiresIn * 1000)
+    };
 
-    // return {
-    //     tokens,
-    //     user: {
-    //         id: testUser.id,
-    //         email: credentials.email,
-    //         firstName: testUser.firstName,
-    //         lastName: testUser.lastName,
-    //         phoneNumber: null,
-    //         isActive: true,
-    //         azureAdB2CId: `dummy_azure_id_${testUser.id}`,
-    //         userRoles: [{
-    //             id: testUser.id,
-    //             userId: testUser.id,
-    //             roleId: testUser.roleId,
-    //             assignedAt: new Date(),
-    //             revokedAt: null
-    //         }],
-    //         createdAt: new Date(),
-    //         modifiedAt: null,
-    //         lastLoginAt: new Date()
-    //     }
-    // };
+    return {
+        tokens ,
+        user: {
+            id: testUser.id,
+            email: credentials.email,
+            firstName: testUser.firstName,
+            lastName: testUser.lastName,
+            phoneNumber: null,
+            isActive: true,
+            azureAdB2CId: `dummy_azure_id_${testUser.id}`,
+            userRoles: [{
+                id: testUser.id,
+                userId: testUser.id,
+                roleId: testUser.roleId,
+                assignedAt: new Date(),
+                revokedAt: null
+            }],
+            createdAt: new Date(),
+            modifiedAt: null,
+            lastLoginAt: new Date()
+        }
+    };
 }
 
 export async function completeMfaChallenge(verificationCode: string): Promise<AuthResponse> {
