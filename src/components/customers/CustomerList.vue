@@ -268,7 +268,7 @@ const handleAddCustomer = () => {
 
 const handleEditCustomer = (customer: ICustomer) => {
   router.push({
-    name: 'customer-edit',
+    name: 'edit-customer',
     params: { id: customer.id.toString() }
   });
 };

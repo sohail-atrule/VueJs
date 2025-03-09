@@ -96,6 +96,11 @@
       "title": "Create New Customer",
       "success": "Customer created successfully",
       "error": "Failed to create customer"
+    },
+    "edit": {
+      "title": "Edit Customer",
+      "success": "Customer Updated successfully",
+      "error": "Failed to Update customer"
     }
   },
   "breadcrumb": {

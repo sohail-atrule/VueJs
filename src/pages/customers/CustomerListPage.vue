@@ -11,7 +11,7 @@
       </h1>
       <div class="customer-list-page__actions">
         <q-btn
-          v-if="hasCreatePermission"
+          v-if="hasCreatePermission && !isEditMode" 
           color="primary"
           icon="add"
           label="New Customer"
@@ -19,6 +19,16 @@
           :loading="loading"
           @click="handleCreateCustomer"
           aria-label="Create new customer"
+        />
+        <q-btn
+          v-if="hasEditPermission && isEditMode"
+          color="primary"
+          icon="dit"
+          label="Edit Customer"
+          no-caps
+          :loading="loading"
+          @click="handleEditCustomer"
+          aria-label="Edit customer"
         />
         <q-btn
           color="secondary"
@@ -92,6 +102,9 @@ const customerStore = useCustomerStore();
 // Component state
 const loading = computed(() => customerStore.loading);
 const hasCreatePermission = computed(() => ['admin', 'operations'].includes(route.meta?.role as string));
+const hasEditPermission = computed(() => ['admin', 'operations'].includes(route.meta?.role as string));
+
+const isEditMode = computed(() => route.query.mode === 'edit');
 
 const initialFilters = ref({
   region: route.query.region || '',
@@ -148,6 +161,11 @@ const handleCustomerSelect = async (customerId: number) => {
   } catch (error) {
     handleError('Navigation failed', error);
   }
+};
+
+
+const handleEditCustomer = () => {
+  router.push({ name: 'edit-customer' });
 };
 
 const handleCreateCustomer = () => {
