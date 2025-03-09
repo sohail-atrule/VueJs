@@ -47,7 +47,7 @@
     <div class="customer-list-page__content">
       <div class="row q-col-gutter-md">
         <!-- Filter Panel -->
-        <div class="col-12 col-md-3">
+        <div class="col-12">
           <FilterPanel
             filter-type="customer"
             :initial-filters="initialFilters"
@@ -57,7 +57,7 @@
         </div>
 
         <!-- Customer List -->
-        <div class="col-12 col-md-9">
+        <div class="col-12">
           <CustomerList
             :loading="loading"
             @row-click="handleCustomerSelect"
@@ -210,7 +210,8 @@ onMounted(async () => {
   try {
     await customerStore.fetchCustomers();
   } catch (error) {
-    handleError('Failed to load customers', error);
+    // handleError('Failed to load customers', error);
+    console.log(error)
   }
 });
 
@@ -219,21 +220,21 @@ onUnmounted(() => {
 });
 
 // Watch route changes
-watch(
-  () => route.query,
-  async (newQuery) => {
-    try {
-      await customerStore.updateFilters({
-        search: newQuery.search || '',
-        region: newQuery.region || '',
-        status: newQuery.status || null
-      });
-    } catch (error) {
-      handleError('Failed to update filters from URL', error);
-    }
-  },
-  { immediate: true }
-);
+// watch(
+//   () => route.query,
+//   async (newQuery) => {
+//     try {
+//       await customerStore.updateFilters({
+//         search: newQuery.search || '',
+//         region: newQuery.region || '',
+//         status: newQuery.status || null
+//       });
+//     } catch (error) {
+//       handleError('Failed to update filters from URL', error);
+//     }
+//   },
+//   { immediate: true }
+// );
 </script>
 
 <style lang="scss" scoped>

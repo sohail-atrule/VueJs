@@ -4,6 +4,7 @@
  * @version 1.0.0
  */
 
+import axios from 'axios';
 import type { GeographyPoint, Inspector, InspectorStatus, DrugTest, Certification } from '../models/inspector.model';
 import api from '../utils/api.util';
 
@@ -80,6 +81,8 @@ export interface SearchInspectorsResponse {
     totalCount: number;
 }
 
+const Base_Url = 'http://192.168.10.154:5235/api/v1';
+
 export async function searchInspectors(params: SearchInspectorsParams): Promise<SearchInspectorsResponse> {
     try {
         if (params.location) {
@@ -98,7 +101,11 @@ export async function searchInspectors(params: SearchInspectorsParams): Promise<
             ...(params.isActive !== undefined && { isActive: params.isActive })
         };
 
-        const response = await api.get(`${API_BASE_PATH}/search`, { params: searchParams });
+        console.log("searchParams:", searchParams);
+
+        const response = await axios.get(`${Base_Url}/Inspectors/search`, { params: searchParams });
+        // const response = await axios.get(`${API_BASE_PATH}/search`, { params: searchParams });
+
         return response.data;
     } catch (error) {
         console.error('Failed to search inspectors:', error);
@@ -172,21 +179,22 @@ export async function updateInspector(id: string, data: UpdateInspectorRequest):
 /**
  * Mobilizes an inspector for assignment
  */
-export async function mobilizeInspector(id: string): Promise<void> {
+export async function mobilizeInspector(id: number): Promise<void> {
     try {
-        await api.post(`${API_BASE_PATH}/${id}/mobilize`);
+      await axios.post(
+        `${Base_Url}/Inspectors/${id}/mobilize`);
     } catch (error) {
-        console.error(`Failed to mobilize inspector ${id}:`, error);
-        throw error;
+      console.error(`Failed to mobilize inspector ${id}:`, error);
+      throw error; 
     }
-}
+  }
 
 /**
  * Records a new drug test for an inspector
  */
 export async function addDrugTest(inspectorId: string, data: Omit<DrugTest, 'id' | 'inspectorId'>): Promise<DrugTest> {
     try {
-        const response = await api.post(`${API_BASE_PATH}/${inspectorId}/drug-tests`, data);
+        const response = await axios.post(`${Base_Url}/Inspectors/${inspectorId}/drug-tests`, data);
         return response.data;
     } catch (error) {
         console.error(`Failed to add drug test for inspector ${inspectorId}:`, error);

@@ -9,6 +9,7 @@ import { useNotificationStore } from './notification.store';
 import customerApi from '../api/customer.api';
 import type { ICustomer } from '../models/customer.model';
 import { CustomerStatus } from '../models/customer.model';
+import { ref } from 'vue';
 
 /**
  * Interface defining the API response structure
@@ -101,55 +102,40 @@ export const useCustomerStore = defineStore('customer', {
   },
 
   actions: {
-    /**
-     * Fetches customers with pagination and filtering support
-     */
-    // async fetchCustomers(): Promise<void> {
-    //   try {
-    //     this.loading = true;
-    //     this.error = null;
-
-    //     // const response = await customerApi.getCustomers({
-    //     //   page: this.pagination.page,
-    //     //   limit: this.pagination.limit,
-    //     //   search: this.filters.search,
-    //     //   region: this.filters.region,
-    //     //   status: this.filters.status || undefined,
-    //     //   sortBy: this.sorting.field,
-    //     //   sortOrder: this.sorting.order
-    //     // });
-
-    //    const customerList = await customerApi.getCustomers();
 
 
-    //     // // Clear existing customers
-    //     // this.customers.clear();
-
-    //     // // Update store with Map-based storage
-    //     // if (response.items && Array.isArray(response.items)) {
-    //     //   response.items.forEach((customer: ICustomer) => {
-    //     //     this.customers.set(customer.id, customer);
-    //     //   });
-    //     // }
-
-    //     // // Update pagination
-    //     // this.pagination.total = response.total || 0;
-    //   } catch (error) {
-    //     this.error = error instanceof Error ? error.message : 'Failed to fetch customers';
-    //     useNotificationStore().error(this.error);
-    //   } finally {
-    //     this.loading = false;
-    //   }
-    // },
-
-
-    async fetchCustomers(): Promise<void> {
+    async fetchCustomers(
+      {
+        region,
+        status,
+        search,
+        industry,
+        page,
+        pageSize,
+      }: {
+        region: string;
+        status: CustomerStatus;
+        search: string;
+        industry: string;
+        page: number;
+        pageSize: number;
+      }
+    ): Promise<void> {
       try {
         this.loading = true; 
         this.error = null; 
     
         // Fetch the list of customers from the API
-        const response = await customerApi.getCustomers();
+        const response = await customerApi.getCustomers(
+          {
+            region,
+            status,
+            search,
+            industry,
+            page,
+            pageSize,
+          }
+        );
     
         // Clear existing customers
         this.customers.clear();
@@ -224,7 +210,6 @@ export const useCustomerStore = defineStore('customer', {
       // if (!previousData) return;
 
 
-      console.log("id in store file", updates);
       try {
         this.loading = true;
         this.error = null;
@@ -278,14 +263,8 @@ export const useCustomerStore = defineStore('customer', {
       }
     },
 
-    /**
-     * Updates filter criteria and refreshes data
-     */
-    async updateFilters(filters: Partial<FilterState>): Promise<void> {
-      this.filters = { ...this.filters, ...filters };
-      this.pagination.page = 1; // Reset to first page
-      await this.fetchCustomers();
-    },
+
+
 
     /**
      * Updates sorting criteria and refreshes data
@@ -301,7 +280,14 @@ export const useCustomerStore = defineStore('customer', {
     async updatePagination(page: number, limit?: number): Promise<void> {
       this.pagination.page = page;
       if (limit) this.pagination.limit = limit;
-      await this.fetchCustomers();
+      await this.fetchCustomers({
+        region: this.filters.region,
+        status: this.filters.status,
+        search: this.filters.search,
+        industry: this.filters.search, 
+        page: this.pagination.page,
+        pageSize: this.pagination.limit,
+      });
     },
 
     /**
