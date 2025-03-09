@@ -43,7 +43,15 @@
       "east": "East",
       "west": "West"
     },
+    "industry": {
+      "all": "All Industries",
+      "energy": "Energy",
+      "manufacturing": "Manufacturing",
+      "transportation": "Transportation",
+      "utilities": "Utilities"
+    },
     "filters": {
+      "industry": "Industry",
       "region": "Region",
       "status": "Status"
     },

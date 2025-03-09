@@ -31,7 +31,7 @@ interface CachedSearchResult {
 
 // Interface for store state
 interface InspectorState {
-    inspectors: Inspector[];
+    inspectors: [];
     selectedInspector: Inspector | null;
     loading: boolean;
     searchLoading: boolean;
@@ -43,28 +43,28 @@ interface InspectorState {
 }
 
 // Generate cache key from search parameters
-const generateCacheKey = (params: SearchParameters): string => {
-    return JSON.stringify({
-        lat: params.location.latitude,
-        lng: params.location.longitude,
-        radius: params.radiusInMiles,
-        status: params.status,
-        certs: params.certifications.sort(),
-        active: params.isActive,
-        page: params.pageNumber,
-        size: params.pageSize
-    });
-};
+// const generateCacheKey = (params: SearchParameters): string => {
+//     return JSON.stringify({
+//         lat: params.location.latitude,
+//         lng: params.location.longitude,
+//         radius: params.radiusInMiles,
+//         status: params.status,
+//         certs: params.certifications.sort(),
+//         active: params.isActive,
+//         page: params.pageNumber,
+//         size: params.pageSize
+//     });
+// };
 
-// Check if cached result is still valid
-const isCacheValid = (timestamp: number): boolean => {
-    return Date.now() - timestamp < CACHE_DURATION_MS;
-};
+// // Check if cached result is still valid
+// const isCacheValid = (timestamp: number): boolean => {
+//     return Date.now() - timestamp < CACHE_DURATION_MS;
+// };
 
 // Create and export the inspector store
 export const useInspectorStore = defineStore('inspector', {
     state: (): InspectorState => ({
-        inspectors: [],
+        inspectors:[],
         selectedInspector: null,
         loading: false,
         searchLoading: false,

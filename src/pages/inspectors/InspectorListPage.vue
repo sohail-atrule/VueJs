@@ -239,15 +239,15 @@ export default defineComponent({
     });
 
     // Error boundary
-    onErrorCaptured((err) => {
-      console.error('Inspector list error:', err);
-      $q.notify({
-        type: 'negative',
-        message: 'An error occurred while loading inspectors',
-        position: 'top'
-      });
-      return false;
-    });
+    // onErrorCaptured((err) => {
+    //   console.error('Inspector list error:', err);
+    //   $q.notify({
+    //     type: 'negative',
+    //     message: 'An error occurred while loading inspectors',
+    //     position: 'top'
+    //   });
+    //   return false;
+    // });
 
     return {
       inspectors,

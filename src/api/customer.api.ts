@@ -47,10 +47,49 @@ const Base_Url = 'http://192.168.10.154:5235/api/v1';
 //   return response.data;
 // };
 
-export const getCustomers = async (): Promise<CustomerApiResponse> => {
-  const response = await axios.get(`${Base_Url}/Customers?region=North&page=1&pageSize=20`);
-  return response.data;
+
+export const getCustomers = async ({
+  region,
+  status,
+  search,
+  industry,
+  page,
+  pageSize,
+}: {
+  region?: string;
+  status?: CustomerStatus | null;
+  search?: string;
+  industry?: string;
+  page: number;
+  pageSize: number;
+}): Promise<CustomerApiResponse> => {
+  try {
+    // Ensure industry and other parameters are correctly set
+    const params: Record<string, any> = {
+      region: region || "North",       
+      status: status || "Active",        
+      industry: industry || " ",      
+      search,
+      page,
+      pageSize,
+    };
+
+    console.log('API Call Params:', params);
+
+    // Make the API call with dynamic query parameters
+    const response = await axios.get(`${Base_Url}/Customers`, { params });
+
+    return response.data as CustomerApiResponse;
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    throw new Error('Failed to fetch customers');
+  }
 };
+
+
+
+
+
 
 
 

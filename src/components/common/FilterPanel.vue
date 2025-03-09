@@ -1,5 +1,5 @@
 <template>
-  <q-card class="filter-panel q-pa-md" role="region" aria-label="Filter Panel">
+  <q-card v-if="filterType !== 'customer'" class="filter-panel q-pa-md" role="region" aria-label="Filter Panel">
     <!-- Filter Header -->
     <div class="row items-center q-mb-md">
       <div class="text-h6">{{ filterTypeLabel }}</div>
