@@ -138,6 +138,28 @@ export const default_routes: RouteRecordRaw[] = [
               layout: 'default',
             },
           },
+          {
+            path: 'create',
+            name: 'inspector-create',
+            component: () => import('../pages/inspectors/InspectorFormPage.vue' as any),
+            meta: {
+              requiresAuth: true,
+              title: 'Create Inspectors',
+              allowedRoles: ['Admin', 'Operations'],
+              layout: 'default',
+          },
+        },
+        {
+          path: 'edit',
+          name: 'inspector-edit',
+          component: () => import('../pages/inspectors/InspectorFormPage.vue' as any),
+          meta: {
+            requiresAuth: true,
+            title: 'Edit Inspectors',
+            allowedRoles: ['Admin', 'Operations'],
+            layout: 'default',
+        },
+      }
         ],
       },
       {

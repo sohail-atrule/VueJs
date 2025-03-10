@@ -3,24 +3,18 @@
  * @version 1.0.0
  */
 
-import { UserRoleType } from '@/models/user.model';
+// import { UserRoleType } from '@/models/user.model';
 import type { LoginCredentials, AuthToken, MfaChallenge } from '@/models/auth.model';
 import type { IUser } from '@/models/user.model';
 import axios from 'axios';
 
-// Map UserRoleType to numeric role IDs
-const ROLE_ID_MAP = {
-    [UserRoleType.Admin]: 1,
-    [UserRoleType.Operations]: 2,
-    [UserRoleType.Inspector]: 3,
-    [UserRoleType.CustomerService]: 4
-};
+
 
 interface AuthResponse {
     tokens: AuthToken;
     user: IUser;
-    requiresMfa?: boolean;
-    mfaChallenge?: MfaChallenge;
+    // requiresMfa?: boolean;
+    // mfaChallenge?: MfaChallenge;
 }
 
 interface TestUser {
@@ -31,44 +25,59 @@ interface TestUser {
 }
 
 
+export enum UserRoleType {
+    Admin = 'Admin',
+    Operations = 'Operations',
+    Inspector = 'Inspector',
+    CustomerService = 'CustomerService',
+    Any = '*'
+}
+
+const ROLE_ID_MAP = {
+    [UserRoleType.Admin]: 1,
+    [UserRoleType.Operations]: 2,
+    [UserRoleType.Inspector]: 3,
+    [UserRoleType.CustomerService]: 4
+};
 
 export async function performAzureAuth(credentials: LoginCredentials): Promise<AuthResponse> {
- 
-
-    // TODO: Implement actual Azure AD B2C authentication
-  try {
-    const response = await axios.post('http://192.168.10.154:5235/api/v1/auth/login', credentials);
-    console.log(response);
-    return {
-        tokens : response.data.tokens,
-        user : {
-            id: response.data.user.id,
-            email: credentials.email,
-            firstName: response.data.user.firstName,
-            lastName: response.data.user.lastName,
-            phoneNumber: null, // Explicitly set as null
-            isActive: true,
-            azureAdB2CId: "",
-            userRoles: [
-              {
-                id: ROLE_ID_MAP[UserRoleType.Admin], // Map to roleId
-                userId: response.data.user.id,
-                roleId: ROLE_ID_MAP[UserRoleType.Admin], // Store the correct roleId
-                assignedAt: new Date(), // Ensure Date type
-                revokedAt: null,
-              },
-            ],
-            createdAt: new Date(),
-            modifiedAt: null,
-            lastLoginAt: new Date(),
-        }
-    };
-  } catch (error) {
-    console.log(error);
-    throw new Error('Authentication failed');
+    try {
+      const response = await axios.post('http://192.168.10.154:5235/api/v1/auth/login', credentials);
+  
+      const { id, firstName, lastName, userRoles } = response.data.user;
+  
+      const MappedUserRoles = userRoles.map((role: keyof typeof ROLE_ID_MAP) => ({
+        id: ROLE_ID_MAP[role], 
+        userId: id, 
+        roleId: ROLE_ID_MAP[role], 
+        assignedAt: new Date(),
+        revokedAt: null,
+      }));
+  
+      return {
+        tokens: response.data.tokens,
+        user: {
+          id,
+          email: credentials.email,
+          firstName,
+          lastName,
+          phoneNumber: null,
+          isActive: true,
+          azureAdB2CId: '',
+          userRoles : MappedUserRoles,
+          createdAt: new Date(),
+          modifiedAt: null,
+          lastLoginAt: new Date(),
+        },
+      };
+    } catch (error) {
+      console.error('Error during authentication:', error);
+      throw new Error('Authentication failed');
+    }
   }
 
-}
+
+
 
 export async function completeMfaChallenge(verificationCode: string): Promise<AuthResponse> {
     // TODO: Implement actual MFA verification

@@ -1,5 +1,12 @@
 <template>
   <div class="inspector-list" role="region" aria-label="Inspector Management">
+    <div class="row justify-end mb-4 p-3">
+  <QBtn
+    color="primary"
+    label="Create"
+    @click.stop="handleViewCreateInspector"
+  />
+</div>
     <!-- Search and Filter Section -->
     <QCard class="filter-section q-mb-md">
       <QCardSection>
@@ -12,6 +19,7 @@
               :validation-rules="[validateSearchInput]"
               @search="handleSearch"
               @clear="handleSearchClear"
+              v-model="searchText"
               class="search-bar"
             />
           </div>
@@ -76,7 +84,7 @@
                 color="primary"
                 icon="person"
                 :aria-label="t('inspector.actions.view')"
-                @click.stop="handleViewInspector(props.row)"
+                @click.stop="handleViewEditInspector(props.row)"
               />
 
               <!-- "Mobilize" Button (Icon on the left) -->
@@ -155,6 +163,7 @@
   import { useI18n } from 'vue-i18n';
   import { useInspectorStore } from '@/stores/inspector.store';
   import { mobilizeInspector } from '@/api/inspector.api';
+//  import InspectorForm from './InspectorForm.vue';
 
   // Component state
   const { t } = useI18n();
@@ -163,6 +172,7 @@
   const inspectorStore = useInspectorStore();
   const loading = computed(() => inspectorStore.isSearching);
   const statusFilter = ref<InspectorStatus[]>([]);
+  const searchText = ref<string>('');
 
   // Notifications
   const showError = (message: string) => {
@@ -195,10 +205,16 @@
     coordinates: [number, number];
   }): string => {
     if (!location || !location.coordinates) return 'Unknown';
-    return `${location.coordinates[1].toFixed(6)}, Lng: ${location.coordinates[0].toFixed(6)}`;
+    return `${location.coordinates[1].toFixed(6)}, ${location.coordinates[0].toFixed(6)}`;
   };
+  const statusMap: Record<number, string> = {
+  0: InspectorStatus.Inactive,
+  1: InspectorStatus.Available,
+  2: InspectorStatus.Mobilized,
+  3: InspectorStatus.Suspended
+};
 
-  // Table column definitions with accessibility support
+  // Table column definitions with accessibility support 
   const tableColumns = computed(() => [
     {
       name: 'badgeNumber',
@@ -217,7 +233,7 @@
     {
       name: 'status',
       label: 'Status',
-      field: (row: any) => (row.isActive ? 'Active' : 'Inactive'),
+      field: (row: any) => statusMap[row.status] ?? 'Inactive',
       sortable: false,
       align: 'center',
     },
@@ -274,6 +290,7 @@
 
   // Event handlers
   const handleSearch = debounce(async (searchText: string) => {
+
     try {
       if (!searchText.trim()) {
         await loadInitialData();
@@ -285,7 +302,8 @@
         null, 
         statusFilter.value, 
         [], 
-        null 
+        null,
+        searchText
       );
       showSuccess(t('inspector.search.success'));
     } catch (error) {
@@ -307,7 +325,8 @@
         null, // radius
         statuses, // Pass the selected statuses
         [], // certifications
-        null // includeUnavailable - set to null instead of true
+        null, // includeUnavailable - set to null instead of true,
+        searchText.value
       );
     } catch (error) {
       console.error('Status filter error:', error);
@@ -321,9 +340,12 @@
     }
   };
 
-  const handleViewInspector = (inspector: Inspector) => {
-    emit('view', inspector);
-  };
+  const handleViewEditInspector = (inspector?: Inspector) => {
+  router.push({ name: 'inspector-create', query: { inspectorId: inspector?.id } });
+};
+  const handleViewCreateInspector = (inspector?: Inspector) => {
+  router.push({ name: 'inspector-edit', query: { inspectorId: inspector?.id } });
+};
 
   const handleMobilize = async (inspector: Inspector) => {
   if (!inspector || !inspector.id) {
@@ -438,7 +460,8 @@
         null, // radius
         statusFilter.value, // Pass current status filter
         [], // No certification filter
-        null // includeUnavailable - set to null instead of true
+        null, // includeUnavailable - set to null instead of true
+        searchText.value
       );
     } catch (error) {
       console.error('Failed to load initial data:', error);
