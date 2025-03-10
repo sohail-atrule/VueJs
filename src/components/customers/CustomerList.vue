@@ -179,7 +179,7 @@
     rowsNumber: 0,
   });
   const onTableRequest = async (props: any) => {
-  
+    debugger
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
     // Update pagination state reactively
@@ -376,6 +376,7 @@
 
   const fetchCustomers = async () => {
   try {
+    debugger
     const response = await customerStore.fetchCustomers({
       region: filters.value.region,
       status: filters.value.status,

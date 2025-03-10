@@ -115,7 +115,7 @@ async function handleSubmit() {
 
     // Perform the POST request directly via axios
     // (You could also call your createInspector(...) API method if you adapt it)
-  
+    debugger
     await axios.post(
       'https://192.168.10.154:7031/api/v1/Inspectors',
       payload,

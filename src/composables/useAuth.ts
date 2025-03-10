@@ -60,7 +60,7 @@ export function useAuth() {
       // Check if token is valid
       const isTokenValid = await verifyTokenIntegrity(authStore.tokens as any);
       if (!isTokenValid) {
-        await logout();
+        //await logout();
         return false;
       }
 
@@ -73,7 +73,7 @@ export function useAuth() {
       return true;
     } catch (error) {
       console.error('Session validation failed:', error);
-      await logout();
+     // await logout();
       return false;
     }
   };
@@ -100,7 +100,7 @@ export function useAuth() {
       switch (event.type) {
         case 'SESSION_INVALID':
         case 'SECURITY_VIOLATION':
-          await logout();
+          //await logout();
           break;
         default:
           console.warn('Unhandled security event:', event);
@@ -150,6 +150,7 @@ export function useAuth() {
   };
 
   const logout = async () => {
+    debugger
     isLoading.value = true;
     error.value = null;
 
@@ -179,18 +180,18 @@ export function useAuth() {
     }
   };
 
-  const startSessionMonitoring = () => {
-    // Monitor session status
-    setInterval(async () => {
-      const isValid = await checkAuthStatus();
-      if (!isValid) {
-        handleSecurityEvent({
-          type: 'SESSION_INVALID',
-          timestamp: new Date(),
-        });
-      }
-    }, SECURITY_CHECK_INTERVAL);
-  };
+  // const startSessionMonitoring = () => {
+  //   // Monitor session status
+  //   setInterval(async () => {
+  //     const isValid = await checkAuthStatus();
+  //     if (!isValid) {
+  //       handleSecurityEvent({
+  //         type: 'SESSION_INVALID',
+  //         timestamp: new Date(),
+  //       });
+  //     }
+  //   }, SECURITY_CHECK_INTERVAL);
+  // };
 
   const checkAuthStatus = async (): Promise<boolean> => {
     try {
@@ -202,16 +203,16 @@ export function useAuth() {
       }
 
       // Check session validity
-      const timeRemaining = authStore.sessionTimeRemaining;
-      if (timeRemaining <= 0) {
-        await logout();
-        return false;
-      }
+      // const timeRemaining = authStore.sessionTimeRemaining;
+      // if (timeRemaining <= 0) {
+      //   await logout();
+      //   return false;
+      // }
 
       return true;
     } catch (error) {
       console.error('Auth status check failed:', error);
-      await logout();
+      //await logout();
       return false;
     }
   };

@@ -1,4 +1,7 @@
 src\pages\customers\CustomerCreatePage.vue
+
+
+
 <template>
   <div class="customer-create-page q-pa-md">
     <!-- Dynamic Title -->
@@ -37,6 +40,18 @@ src\pages\customers\CustomerCreatePage.vue
                 placeholder="XYZ-123"
                 :disable="isEditMode"
               />
+
+              <!-- <q-input
+                v-model="formData.code"
+                :label="t('customer.fields.code')"
+                :rules="[val => !!val || t('validation.required')]"
+                outlined
+                dense
+                lazy-rules
+                :disable="isEditMode"
+                
+                @update:model-value="handleInput"
+              /> -->
             </div>
 
             <div class="col-12 col-md-6">

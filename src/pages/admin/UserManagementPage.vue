@@ -207,7 +207,7 @@
   });
 
   const handleSearch = async () => {
-  
+    debugger
     try {
       const searchParams = {
         ...(filters.searchEnabled ? { searchTerm: filters.searchTerm } : {}),
@@ -230,14 +230,14 @@
   };
 
   const handlePaginationChange = async (newPagination: any) => {
-   
+    debugger
     pagination.value.page = newPagination.page;
     pagination.value.rowsPerPage = newPagination.rowsPerPage;
     await handleSearch();
   };
 
   const openUserDialog = async (user?: IUser) => {
-    
+    debugger
     editingUser.value = user || null;
     if (user) {
       try {
@@ -276,7 +276,7 @@
   };
 
   const saveUser = async () => {
-    
+    debugger
     try {
       if (!validateUserData(userForm.value)) {
         throw new Error('Please fill in all required fields');
@@ -332,7 +332,7 @@
   };
 
   const onTableRequest = async (props: any) => {
-   
+    debugger
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
     // Update pagination state

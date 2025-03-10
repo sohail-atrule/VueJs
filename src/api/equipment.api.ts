@@ -48,7 +48,7 @@ const logger = {
 
 // Helper function to convert IEquipment to Equipment
 function convertToEquipment(item: any): Equipment {
-
+    debugger
     return new Equipment({
         id: Number(item.id),
         serialNumber: item.serialNumber,
@@ -260,6 +260,7 @@ export default equipmentApi;
 
 // Standalone functions using the same logger and error handling
 export async function getEquipmentList(filters: Record<string, any>): Promise<Equipment[]> {
+    debugger
     try {
         logger.info('Fetching equipment list');
         // Debug log to see the full URL

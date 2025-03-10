@@ -48,6 +48,7 @@ export class Equipment implements IEquipmentData {
     documents: EquipmentDocument[] = [];
 
     constructor(data: Partial<Equipment> = {}) {
+        debugger
         Object.assign(this, {
             ...this.getDefaults(),
             ...data,

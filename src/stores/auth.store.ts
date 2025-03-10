@@ -153,7 +153,7 @@ export const useAuthStore = defineStore('auth', {
                 // Perform authentication
                 const response = await performAzureAuth(credentials);
 
-               
+                debugger;
                 // if (response.requiresMfa && response.mfaChallenge) {
                 //     this.authStatus = AuthStatus.MFA_REQUIRED;
                 //     this.mfaChallenge = response.mfaChallenge;
@@ -263,7 +263,7 @@ export const useAuthStore = defineStore('auth', {
             const { encrypt } = useEncryption();
             const { saveAuthToken, saveUserSession } = useStorage();
 
-           
+            debugger;
             if (response.tokens) {
                 this.tokens = response.tokens;
                 await saveAuthToken(response.tokens);

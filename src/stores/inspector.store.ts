@@ -97,6 +97,7 @@ export const useInspectorStore = defineStore('inspector', {
             includeUnavailable = null,
             search?: string
         ) {
+            debugger
             this.loading = true;
             try {
                 const response = await searchInspectors({

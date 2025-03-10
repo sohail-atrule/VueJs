@@ -214,7 +214,8 @@
   3: InspectorStatus.Suspended
 };
 
-  // Table column definitions with accessibility support 
+  // Table column definitions with accessibility support
+  debugger
   const tableColumns = computed(() => [
     {
       name: 'badgeNumber',
@@ -290,7 +291,7 @@
 
   // Event handlers
   const handleSearch = debounce(async (searchText: string) => {
-
+    debugger
     try {
       if (!searchText.trim()) {
         await loadInitialData();
@@ -341,7 +342,7 @@
   };
 
   const handleViewEditInspector = (inspector?: Inspector) => {
-  router.push({ name: 'inspector-create', query: { inspectorId: inspector?.id } });
+  //router.push({ name: 'inspector-create', query: { inspectorId: inspector?.id } });
 };
   const handleViewCreateInspector = (inspector?: Inspector) => {
   router.push({ name: 'inspector-edit', query: { inspectorId: inspector?.id } });
@@ -454,6 +455,7 @@
 
   // Load initial data
   const loadInitialData = async () => {
+    debugger
     try {
       await inspectorStore.searchInspectors(
         null, // location

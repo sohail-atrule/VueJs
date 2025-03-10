@@ -86,6 +86,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
   // Actions
   const loadEquipment = async (forceRefresh = false, filters: Record<string, any> = {}) => {
+    debugger
     // if (!forceRefresh && isCacheValid.value) {
     //   return equipment.value;
     // }

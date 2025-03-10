@@ -114,6 +114,7 @@ const createApiInstance = (): AxiosInstance => {
  * @param token The authentication token to set
  */
 export const setAuthToken = (token: AuthToken): void => {
+    debugger
     if (!token || !token.accessToken || !token.refreshToken) {
         throw new Error('Invalid authentication token');
     }
