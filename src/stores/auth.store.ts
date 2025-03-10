@@ -150,11 +150,10 @@ export const useAuthStore = defineStore('auth', {
                     throw new Error('Too many login attempts. Please try again later.');
                 }
 
-
-              
                 // Perform authentication
                 const response = await performAzureAuth(credentials);
 
+               
                 // if (response.requiresMfa && response.mfaChallenge) {
                 //     this.authStatus = AuthStatus.MFA_REQUIRED;
                 //     this.mfaChallenge = response.mfaChallenge;
@@ -264,7 +263,7 @@ export const useAuthStore = defineStore('auth', {
             const { encrypt } = useEncryption();
             const { saveAuthToken, saveUserSession } = useStorage();
 
-       
+           
             if (response.tokens) {
                 this.tokens = response.tokens;
                 await saveAuthToken(response.tokens);

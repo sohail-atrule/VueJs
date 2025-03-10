@@ -8,10 +8,10 @@ export interface GeographyPoint {
  * Enum defining all possible inspector statuses for workflow management
  */
 export enum InspectorStatus {
-    Inactive = 'INACTIVE',
-    Available = 'AVAILABLE',
-    Mobilized = 'MOBILIZED',
-    Suspended = 'SUSPENDED'
+    Inactive = 'Inactive',
+    Available = 'Available',
+    Mobilized = 'Mobilized',
+    Suspended = 'Suspended'
 }
 
 /**

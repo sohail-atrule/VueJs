@@ -62,14 +62,15 @@ export const getCustomers = async ({
   industry?: string;
   page: number;
   pageSize: number;
-}): Promise<CustomerApiResponse> => {
+}): Promise<any> => {
+  debugger
   try {
     // Ensure industry and other parameters are correctly set
     const params: Record<string, any> = {
       region: region || "North",       
       status: status || "Active",        
       industry: industry || " ",      
-      search,
+      searchTerm:search,
       page,
       pageSize,
     };
@@ -78,8 +79,13 @@ export const getCustomers = async ({
 
     // Make the API call with dynamic query parameters
     const response = await axios.get(`${Base_Url}/Customers`, { params });
-
-    return response.data as CustomerApiResponse;
+    var c = response.data.totalCount;
+    debugger
+    //return response.data.customers as CustomerApiResponse;
+    return {
+      customers: response.data.customers,
+      totalCount: response.data.totalCount,
+    };
   } catch (error) {
     console.error('Error fetching customers:', error);
     throw new Error('Failed to fetch customers');

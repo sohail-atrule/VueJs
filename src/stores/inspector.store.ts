@@ -20,6 +20,7 @@ interface SearchParameters {
     isActive: boolean | null;
     pageNumber: number;
     pageSize: number;
+    search?: string;
 }
 
 // Interface for cached search results
@@ -93,7 +94,8 @@ export const useInspectorStore = defineStore('inspector', {
             radius: number | null,
             status: InspectorStatus[] | null,
             certifications: string[],
-            includeUnavailable = null
+            includeUnavailable = null,
+            search?: string
         ) {
             this.loading = true;
             try {
@@ -105,7 +107,8 @@ export const useInspectorStore = defineStore('inspector', {
                     radiusInMiles: radius || undefined,
                     status: status || undefined,
                     certifications,
-                    isActive: includeUnavailable === false ? true : undefined
+                    isActive: includeUnavailable === false ? true : undefined,
+                    search: search || undefined
                 });
 
                 this.inspectors = response.items;

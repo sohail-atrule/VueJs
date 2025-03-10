@@ -141,11 +141,18 @@ export const useCustomerStore = defineStore('customer', {
         this.customers.clear();
     
         // Check if the response is an array
-        if (Array.isArray(response)) {
+        if (Array.isArray(response.customers)) {
           // Update store with Map-based storage
-          response.forEach((customer: ICustomer) => {
+          response.customers.forEach((customer: ICustomer) => {
             this.customers.set(customer.id, customer);
           });
+          // Update total in store's pagination
+        this.pagination.total = response.totalCount;
+        // Return the response for the component to use
+        return {
+          customers: response.customers,
+          total: response.totalCount,
+        };
         } else {
           this.error = 'No customers found';
           useNotificationStore().error(this.error);

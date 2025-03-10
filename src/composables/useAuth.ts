@@ -65,10 +65,10 @@ export function useAuth() {
       }
 
       // Check if session is expired
-      if (authStore.sessionTimeRemaining <= 0) {
-        await logout();
-        return false;
-      }
+      // if (authStore.sessionTimeRemaining <= 0) {
+      //   await logout();
+      //   return false;
+      // }
 
       return true;
     } catch (error) {
@@ -137,10 +137,10 @@ export function useAuth() {
 
     try {
       await authStore.login(credentials);
+
       // Navigate to dashboard or saved redirect
-    const redirect = router.currentRoute.value.query.redirect as string;
-    await router.push(redirect || '/dashboard');
-    // return; 
+      const redirect = router.currentRoute.value.query.redirect as string;
+      await router.push(redirect || '/dashboard');
     } catch (err: any) {
       error.value = err.message || 'Login failed';
       throw err;
@@ -179,42 +179,42 @@ export function useAuth() {
     }
   };
 
-  // const startSessionMonitoring = () => {
-  //   // Monitor session status
-  //   setInterval(async () => {
-  //     const isValid = await checkAuthStatus();
-  //     if (!isValid) {
-  //       handleSecurityEvent({
-  //         type: 'SESSION_INVALID',
-  //         timestamp: new Date(),
-  //       });
-  //     }
-  //   }, SECURITY_CHECK_INTERVAL);
-  // };
+  const startSessionMonitoring = () => {
+    // Monitor session status
+    setInterval(async () => {
+      const isValid = await checkAuthStatus();
+      if (!isValid) {
+        handleSecurityEvent({
+          type: 'SESSION_INVALID',
+          timestamp: new Date(),
+        });
+      }
+    }, SECURITY_CHECK_INTERVAL);
+  };
 
-  // const checkAuthStatus = async (): Promise<boolean> => {
-  //   try {
-  //     if (!authStore.isAuthenticated) return false;
+  const checkAuthStatus = async (): Promise<boolean> => {
+    try {
+      if (!authStore.isAuthenticated) return false;
 
-  //     // Check token validity
-  //     if (authStore.tokens && !authStore.isTokenValid) {
-  //       await authStore.refreshToken();
-  //     }
+      // Check token validity
+      if (authStore.tokens && !authStore.isTokenValid) {
+        await authStore.refreshToken();
+      }
 
-  //     // Check session validity
-  //     const timeRemaining = authStore.sessionTimeRemaining;
-  //     if (timeRemaining <= 0) {
-  //       await logout();
-  //       return false;
-  //     }
+      // Check session validity
+      const timeRemaining = authStore.sessionTimeRemaining;
+      if (timeRemaining <= 0) {
+        await logout();
+        return false;
+      }
 
-  //     return true;
-  //   } catch (error) {
-  //     console.error('Auth status check failed:', error);
-  //     await logout();
-  //     return false;
-  //   }
-  // };
+      return true;
+    } catch (error) {
+      console.error('Auth status check failed:', error);
+      await logout();
+      return false;
+    }
+  };
 
   const hasPermission = (permission: string): boolean => {
     const user = authStore.currentUser;
@@ -242,7 +242,7 @@ export function useAuth() {
     securityStatus,
     isInitialized,
     initializeAuth,
-    // checkAuthStatus,
+    checkAuthStatus,
     handleSecurityEvent,
     logout,
     login,

@@ -22,7 +22,7 @@
         <div class="row q-col-gutter-md">
 
           <!-- Industry Filter -->
-          <div class="col-12 col-sm-4">
+          <div class="col-12 col-sm-6 col-md-3">
             <q-select
               v-model="filters.industry"
               :options="industryOptions"
@@ -37,7 +37,7 @@
           </div>
 
           <!-- Region Filter -->
-          <div class="col-12 col-sm-4">
+          <div class="col-12 col-sm-6 col-md-3">
             <q-select
               v-model="filters.region"
               :options="regionOptions"
@@ -52,7 +52,7 @@
           </div>
 
           <!-- Status Filter -->
-          <div class="col-12 col-sm-4">
+          <div class="col-12 col-sm-6 col-md-3">
             <q-select
               v-model="filters.status"
               :options="statusOptions"
@@ -67,7 +67,7 @@
           </div>
 
           <!-- Add Customer Button -->
-          <div class="col-12 col-sm-4 flex justify-end">
+          <div class="col-12 col-sm-6 col-md-3 flex justify-end">
             <q-btn
               color="primary"
               :label="t('customer.actions.add')"
@@ -95,6 +95,7 @@
         virtual-scroll
         v-model:pagination="pagination"
         @row-click="handleRowClick"
+        @request="onTableRequest"
       >
         <!-- Custom Status Column -->
         <template v-slot:body-cell-status="props">
@@ -164,17 +165,33 @@
 
   // Component state
   const filters = ref({
-    region: '',
+    region: 'North',
     status: null as CustomerStatus | null,
     search: '',
     industry:'',
   });
 
   const pagination = ref({
+    sortBy: 'FirstName', 
+    descending: false,
     page: 1,
     rowsPerPage: 10,
     rowsNumber: 0,
   });
+  const onTableRequest = async (props: any) => {
+  
+    const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+    // Update pagination state reactively
+    Object.assign(pagination.value, {
+      page,
+      rowsPerPage,
+      sortBy,
+      descending,
+    });
+
+    await fetchCustomers();
+};
 
   // Table columns definition
   const columns = [
@@ -203,7 +220,7 @@
     },
     {
       name: 'status',
-      field: 'status',
+      field: (row: any) => (row.isActive ? 'ACTIVE' : 'INACTIVE'),
       label: t('customer.fields.status'),
       align: 'center',
       sortable: false
@@ -219,7 +236,7 @@
 
   // Computed properties
   const regionOptions = computed(() => [
-    { label: t('customer.regions.all'), value: null },
+    // { label: t('customer.regions.all'), value: null },
     { label: t('customer.regions.north'), value: 'North' },
     { label: t('customer.regions.south'), value: 'South' },
     { label: t('customer.regions.east'), value: 'East' },
@@ -238,7 +255,7 @@
     { label: t('customer.status.all'), value: null },
     { label: t('customer.status.active'), value: CustomerStatus.Active },
     { label: t('customer.status.inactive'), value: CustomerStatus.Inactive },
-    { label: t('customer.status.pending'), value: CustomerStatus.Pending },
+    //{ label: t('customer.status.pending'), value: CustomerStatus.Pending },
   ]);
 
   const customerList = computed(() => customerStore.customerList);
@@ -287,20 +304,20 @@
   };
 
   const handleRowClick = async (evt: Event, row: ICustomer) => {
-    if (!validateRequired(row.id)) return;
+    // if (!validateRequired(row.id)) return;
 
-    try {
-      await router.push({
-        name: 'customer-details',
-        params: { id: row.id.toString() },
-      });
-    } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: t('customer.errors.navigation_failed'),
-        position: 'top',
-      });
-    }
+    // try {
+    //   await router.push({
+    //     name: 'customer-details',
+    //     params: { id: row.id.toString() },
+    //   });
+    // } catch (error) {
+    //   $q.notify({
+    //     type: 'negative',
+    //     message: t('customer.errors.navigation_failed'),
+    //     position: 'top',
+    //   });
+    // }
   };
 
 
@@ -359,7 +376,7 @@
 
   const fetchCustomers = async () => {
   try {
-    await customerStore.fetchCustomers({
+    const response = await customerStore.fetchCustomers({
       region: filters.value.region,
       status: filters.value.status,
       search: filters.value.search,
@@ -367,7 +384,9 @@
       page: pagination.value.page,
       pageSize: pagination.value.rowsPerPage,
     });
-    
+    if (response && typeof response.total === 'number') {
+      pagination.value.rowsNumber = response.total;
+    }
   } catch (error) {
     $q.notify({
       type: 'negative',

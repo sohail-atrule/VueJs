@@ -133,21 +133,21 @@ const tableColumns = computed(() => [
     name: 'serialNumber',
     label: t('equipment.fields.serial_number'),
     field: 'serialNumber',
-    sortable: true,
+    sortable: false,
     align: 'left'
   },
   {
     name: 'type',
     label: t('equipment.fields.type'),
     field: 'type',
-    sortable: true,
+    sortable: false,
     align: 'left'
   },
   {
     name: 'model',
     label: t('equipment.fields.model'),
     field: 'model',
-    sortable: true,
+    sortable: false,
     align: 'left'
   },
   {
@@ -155,14 +155,14 @@ const tableColumns = computed(() => [
     label: 'Status',
     field: 'status',
     align: 'left',
-    sortable: true
+    sortable: false
   },
   {
     name: 'lastMaintenanceDate',
     label: t('equipment.fields.last_maintenance'),
     field: 'lastMaintenanceDate',
     format: (val: Date) => formatDate(val),
-    sortable: true,
+    sortable: false,
     align: 'left'
   },
   {

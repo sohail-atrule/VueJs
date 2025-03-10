@@ -100,7 +100,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const drugTestForm = ref<typeof QForm | null>(null);
     const isSubmitting = ref(false);
-    const { showSuccess, showError } = useNotification();
+    const { showSuccessNotification, showErrorNotification } = useNotification();
 
     const currentDate = computed(() => date.formatDate(new Date(), 'YYYY-MM-DD'));
 
@@ -132,11 +132,11 @@ export default defineComponent({
           notes: sanitizeInput(formData.value.notes)
         });
 
-        showSuccess('Drug test record created successfully');
+        showSuccessNotification('Drug test record created successfully');
         emit('submitted');
 
       } catch (error) {
-        showError(error instanceof Error ? error.message : 'Failed to create drug test record');
+        showErrorNotification(error instanceof Error ? error.message : 'Failed to create drug test record');
       } finally {
         isSubmitting.value = false;
       }

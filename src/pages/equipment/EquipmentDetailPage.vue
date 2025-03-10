@@ -69,7 +69,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
     <!-- Equipment Details -->
     <div v-if="equipment && !loading" class="row q-pa-md q-col-gutter-md">
       <!-- Basic Information -->
-      <div class="col-12 col-md-6">
+      <div class="col-12">
         <q-card>
           <q-card-section>
             <div class="text-h6">Basic Information</div>
@@ -112,7 +112,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
       </div>
 
       <!-- Specifications -->
-      <div class="col-12 col-md-6">
+      <!-- <div class="col-12 col-md-6">
         <q-card>
           <q-card-section>
             <div class="text-h6">Specifications</div>
@@ -145,7 +145,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
             <div v-else class="text-grey-6">No specifications available</div>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Maintenance History -->
       <div class="col-12">
@@ -197,6 +197,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
                       </div>
                       <div class="col-auto">
                         <q-btn
+                         disabled
                           flat
                           round
                           color="primary"

@@ -85,16 +85,16 @@ export const useEquipmentStore = defineStore('equipment', () => {
   });
 
   // Actions
-  const loadEquipment = async (forceRefresh = false) => {
-    if (!forceRefresh && isCacheValid.value) {
-      return equipment.value;
-    }
+  const loadEquipment = async (forceRefresh = false, filters: Record<string, any> = {}) => {
+    // if (!forceRefresh && isCacheValid.value) {
+    //   return equipment.value;
+    // }
 
     loading.value = true;
     error.value = null;
 
     try {
-      const response = await getEquipmentList();
+      const response = await getEquipmentList(filters);
       equipment.value = response.map(item => {
         try {
           return Equipment.fromJSON({

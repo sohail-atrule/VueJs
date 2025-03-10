@@ -1,3 +1,4 @@
+src\pages\customers\CustomerCreatePage.vue
 <template>
   <div class="customer-create-page q-pa-md">
     <!-- Dynamic Title -->
@@ -33,6 +34,7 @@
                 outlined
                 dense
                 lazy-rules
+                placeholder="XYZ-123"
                 :disable="isEditMode"
               />
             </div>
@@ -56,13 +58,14 @@
                 v-model="formData.status"
                 :options="statusOptions"
                 :label="t('customer.fields.status')"
-                :rules="[val => !!val || t('validation.required')]"
                 outlined
                 dense
                 emit-value
                 map-options
                 lazy-rules
-              />
+                
+                />
+                <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
 
             <div class="col-12">
@@ -84,11 +87,11 @@
               <QInput
                 v-model="formData.contactPerson"
                 :label="t('customer.fields.contactPerson')"
-                :rules="[val => !!val || t('validation.required')]"
                 outlined
                 dense
                 lazy-rules
-              />
+                />
+                <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
 
             <div class="col-12 col-md-6">
@@ -96,25 +99,25 @@
                 v-model="formData.email"
                 type="email"
                 :label="t('customer.fields.email')"
-                :rules="[
-                  val => !!val || t('validation.required'),
-                  val => /^[^@]+@[^@]+\.[^@]+$/.test(val) || t('validation.email')
-                ]"
                 outlined
                 dense
                 lazy-rules
               />
+              <!-- :rules="[
+                val => !!val || t('validation.required'),
+                val => /^[^@]+@[^@]+\.[^@]+$/.test(val) || t('validation.email')
+              ]" -->
             </div>
 
             <div class="col-12 col-md-6">
               <QInput
                 v-model="formData.phone"
                 :label="t('customer.fields.phone')"
-                :rules="[val => !!val || t('validation.required')]"
                 outlined
                 dense
                 lazy-rules
-              />
+                />
+                <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
           </div>
 

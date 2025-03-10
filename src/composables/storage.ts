@@ -15,8 +15,8 @@ export function useStorage() {
             if (!tokenData) return null;
             const token = JSON.parse(tokenData);
             // Convert date strings back to Date objects
-            if (token.accessTokenExpiresAt) {
-                token.accessTokenExpiresAt = new Date(token.accessTokenExpiresAt);
+            if (token.expiresAt) {
+                token.expiresAt = new Date(token.expiresAt);
             }
             return token;
         } catch (error) {
@@ -39,12 +39,12 @@ export function useStorage() {
             if (!sessionData) return null;
             const session = JSON.parse(sessionData);
             // Convert date strings back to Date objects
-            // if (session.lastActivityAt) {
-            //     session.lastActivityAt = new Date(session.lastActivityAt);
-            // }
-            // if (session.refreshTokenExpiry) {
-            //     session.refreshTokenExpiry = new Date(session.refreshTokenExpiry);
-            // }
+            if (session.lastActivityAt) {
+                session.lastActivityAt = new Date(session.lastActivityAt);
+            }
+            if (session.refreshTokenExpiry) {
+                session.refreshTokenExpiry = new Date(session.refreshTokenExpiry);
+            }
             return session;
         } catch (error) {
             console.error('Failed to get user session:', error);

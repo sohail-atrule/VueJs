@@ -7,10 +7,13 @@
 import axios from 'axios';
 import type { GeographyPoint, Inspector, InspectorStatus, DrugTest, Certification } from '../models/inspector.model';
 import api from '../utils/api.util';
+import qs from 'qs';
+
 
 // API endpoint constants
 const API_VERSION = 'v1';
 const API_BASE_PATH = `/${API_VERSION}/inspectors`;
+const Base_Url = 'https://192.168.10.154:7031/api/v1';
 
 /**
  * Interface for paginated response data
@@ -74,6 +77,7 @@ export interface SearchInspectorsParams {
     isActive?: boolean;
     pageNumber?: number;
     pageSize?: number;
+    search?: string;
 }
 
 export interface SearchInspectorsResponse {
@@ -81,7 +85,6 @@ export interface SearchInspectorsResponse {
     totalCount: number;
 }
 
-const Base_Url = 'http://192.168.10.154:5235/api/v1';
 
 export async function searchInspectors(params: SearchInspectorsParams): Promise<SearchInspectorsResponse> {
     try {
@@ -89,22 +92,28 @@ export async function searchInspectors(params: SearchInspectorsParams): Promise<
             validateLocation(params.location);
         }
         
-        // Flatten the location object for URL parameters
+        // Flatten the location object and include all parameters defined in the interface
         const searchParams = {
             ...(params.location && {
                 latitude: params.location.latitude,
-                longitude: params.location.longitude
+                longitude: params.location.longitude,
             }),
             ...(params.radiusInMiles && { radiusInMiles: params.radiusInMiles }),
             ...(params.status && { status: params.status }),
-            certifications: params.certifications,
-            ...(params.isActive !== undefined && { isActive: params.isActive })
+            ...(params.certifications && { certifications: params.certifications }),
+            ...(params.isActive !== undefined && { isActive: params.isActive }),
+            ...(params.pageNumber && { pageNumber: params.pageNumber }),
+            ...(params.pageSize && { pageSize: params.pageSize }),
+            ...(params.search && { search: params.search }),
         };
 
         console.log("searchParams:", searchParams);
 
-        const response = await axios.get(`${Base_Url}/Inspectors/search`, { params: searchParams });
-        // const response = await axios.get(`${API_BASE_PATH}/search`, { params: searchParams });
+        const response = await axios.get(`${Base_Url}/Inspectors/search`, {
+            params: searchParams,
+            // This will ensure arrays are sent as repeated parameters.
+            paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
+        });
 
         return response.data;
     } catch (error) {

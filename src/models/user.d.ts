@@ -11,6 +11,7 @@ declare module '@/models/user.model' {
         createdAt: Date;
         modifiedAt: Date | null;
         lastLoginAt: Date | null;
+        roleIDs?: number[];
     }
 
     export interface IRole {
@@ -44,6 +45,7 @@ declare module '@/models/user.model' {
         roleId: number;
         assignedAt: Date;
         revokedAt: Date | null;
+        role?: IRole;
     }
 
     export function hasRole(user: IUser, role: UserRoleType): boolean;

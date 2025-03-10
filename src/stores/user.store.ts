@@ -5,7 +5,7 @@
  */
 
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import type { IUser } from '@/models/user.model';
 import { getUsers, createUser, updateUser, deleteUser } from '@/api/user.api';
 import { useNotificationStore } from './notification.store';
@@ -43,18 +43,18 @@ export const useUserStore = defineStore('user', () => {
   const notificationStore = useNotificationStore();
 
   // Computed properties
-  const isCacheValid = computed(() => {
-    if (!lastSync.value) return false;
-    return new Date().getTime() - lastSync.value.getTime() < CACHE_DURATION;
-  });
+  // const isCacheValid = computed(() => {
+  //   if (!lastSync.value) return false;
+  //   return new Date().getTime() - lastSync.value.getTime() < CACHE_DURATION;
+  // });
 
   const activeUsers = computed(() => users.value.filter((user) => user.isActive));
 
   // Actions
   const fetchUsers = async (params: Partial<SearchParams> = {}, forceRefresh = false) => {
-    if (!forceRefresh && isCacheValid.value) {
-      return { users: users.value, total: total.value };
-    }
+    // if (!forceRefresh && isCacheValid.value) {
+    //   return { users: users.value, total: total.value };
+    // }
 
     loading.value = true;
     error.value = null;
@@ -64,7 +64,7 @@ export const useUserStore = defineStore('user', () => {
       const response = await getUsers(mergedParams);
       users.value = response.users;
       total.value = response.total;
-      lastSync.value = new Date();
+      //lastSync.value = new Date();
 
       if (forceRefresh) {
         notificationStore.success('Users list updated successfully');
@@ -140,7 +140,9 @@ export const useUserStore = defineStore('user', () => {
   const clearCache = () => {
     lastSync.value = null;
   };
-
+  onUnmounted(() => {
+    clearCache(); // Clear store state
+  });
   return {
     // State
     users,
@@ -152,7 +154,7 @@ export const useUserStore = defineStore('user', () => {
     lastSync,
 
     // Getters
-    isCacheValid,
+    //isCacheValid,
     activeUsers,
 
     // Actions

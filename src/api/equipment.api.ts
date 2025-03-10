@@ -13,7 +13,7 @@ import createError from 'http-errors';
 
 // API endpoint constants
 const API_VERSION = import.meta.env.VITE_APP_API_VERSION || 'v1';
-const BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_APP_API_URL || 'https://192.168.10.154:7031/api';
 const API_ENDPOINTS = {
     EQUIPMENT: `/${API_VERSION}/equipment`,
     ASSIGNMENTS: `/${API_VERSION}/equipment/assignments`,
@@ -48,6 +48,7 @@ const logger = {
 
 // Helper function to convert IEquipment to Equipment
 function convertToEquipment(item: any): Equipment {
+
     return new Equipment({
         id: Number(item.id),
         serialNumber: item.serialNumber,
@@ -66,7 +67,7 @@ function convertToEquipment(item: any): Equipment {
             calibrationDue: item.specifications.calibrationDue,
             warranty: item.specifications.warranty
         } : null,
-        maintenanceHistory: item.maintenanceHistory ? item.maintenanceHistory.map((record: any) => ({
+        maintenanceHistory: item.history ? item.history.map((record: any) => ({
             id: record.id,
             date: record.date,
             type: record.type,
@@ -258,14 +259,39 @@ export const equipmentApi = new EquipmentApiClient();
 export default equipmentApi;
 
 // Standalone functions using the same logger and error handling
-export async function getEquipmentList(): Promise<Equipment[]> {
+export async function getEquipmentList(filters: Record<string, any>): Promise<Equipment[]> {
     try {
         logger.info('Fetching equipment list');
         // Debug log to see the full URL
-        const fullUrl = `${api.defaults.baseURL}${API_ENDPOINTS.EQUIPMENT}`;
-        logger.info('Full URL:', fullUrl);
+        // const fullUrl = `${api.defaults.baseURL}${API_ENDPOINTS.EQUIPMENT}`;
+        // logger.info('Full URL:', fullUrl);
         
-        const response = await api.get(API_ENDPOINTS.EQUIPMENT);
+        // const response = await api.get(API_ENDPOINTS.EQUIPMENT);
+        // return response.data.map(convertToEquipment);
+     
+        
+        const fullUrl = `${BASE_URL}${API_ENDPOINTS.EQUIPMENT}`;
+        logger.info('Full URL:', fullUrl);
+        const params = {
+            page: filters.page || 1, 
+            pageSize: filters.pageSize || 10,
+            startDate: filters.startDate || null,
+            endDate: filters.endDate || null,
+            isAvailable: filters.availability ?? null,  // Ensure boolean values are passed correctly
+            searchTerm: filters.searchTerm || ''
+        };
+
+        // Remove null or undefined values from params
+        //Object.keys(params).forEach(key => params[key] === null && delete params[key]);
+
+        logger.info('Final API Query Params:', params);
+
+        const response = await api.get(fullUrl, {
+            params: params, // Pass the parameters as query parameters
+            headers: {
+                'Content-Type': 'application/json' // This is usually not necessary for GET requests
+            }
+        });
         return response.data.map(convertToEquipment);
     } catch (error) {
         logger.error('Failed to fetch equipment list', { error });

@@ -18,6 +18,7 @@ export type UserRole = {
   roleId: number;
   assignedAt: Date;
   revokedAt: Date | null;
+  role?: IRole;
 };
 
 export interface IUser {

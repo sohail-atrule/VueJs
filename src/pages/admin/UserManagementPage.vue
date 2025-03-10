@@ -46,9 +46,9 @@
           :rows="users"
           :columns="columns"
           :loading="loading"
-          :pagination="pagination"
+          v-model:pagination="pagination"
           row-key="id"
-          @request="handleSearch"
+          @request="onTableRequest"
         >
           <template #body-cell-actions="props">
             <q-td :props="props">
@@ -104,7 +104,11 @@
               <div class="col-12">
                 <q-select
                   v-model="userForm.roles"
-                  :options="roleOptions.map((role) => role.name)"
+                  :options="roleOptions"
+                  option-value="id"
+                  option-label="name"
+                  emit-value
+                  map-options 
                   label="Roles"
                   multiple
                   :rules="[(val) => val.length > 0 || 'At least one role is required']"
@@ -132,6 +136,7 @@
   import { useEncryption } from '@/composables/useEncryption';
   import { auditService } from '@/services/audit.service';
   import { useUserStore } from '@/stores/user.store';
+  import { getUserById, createUser, updateUser } from '@/api/user.api';
 
   const $q = useQuasar();
   const userStore = useUserStore();
@@ -141,10 +146,10 @@
   const editingUser = ref<IUser | null>(null);
 
   const columns = [
-    { name: 'firstName', label: 'First Name', field: 'firstName', sortable: true },
-    { name: 'lastName', label: 'Last Name', field: 'lastName', sortable: true },
+    { name: 'FirstName', label: 'First Name', field: 'firstName', sortable: false },
+    { name: 'LastName', label: 'Last Name', field: 'lastName', sortable: false },
     {
-      name: 'email',
+      name: 'Email',
       label: 'Email',
       field: (row: any) => {
         try {
@@ -155,20 +160,22 @@
           return row.email;
         }
       },
-      sortable: true,
+      sortable: false,
     },
     {
       name: 'roles',
       label: 'Roles',
-      field: (row: any) => row.userRoles?.map((r: any) => r.roles).join(', ') || '',
+      field: (row: IUser) => row.userRoles?.map((r: UserRole) => r.role?.name).join(', ') || '',
     },
     { name: 'status', label: 'Status', field: 'isActive' },
     { name: 'actions', label: 'Actions', field: 'actions' },
   ];
 
-  const pagination = reactive({
+  const pagination = ref({
+    sortBy: 'FirstName', 
+    descending: false,
     page: 1,
-    rowsPerPage: 20,
+    rowsPerPage: 10,
     rowsNumber: 0,
   });
 
@@ -189,7 +196,7 @@
     firstName: string;
     lastName: string;
     email: string;
-    roles: number[];
+    roles: any[];
   }
 
   const userForm = ref<UserFormData>({
@@ -200,18 +207,19 @@
   });
 
   const handleSearch = async () => {
+  
     try {
       const searchParams = {
         ...(filters.searchEnabled ? { searchTerm: filters.searchTerm } : {}),
         isActive: filters.status ?? undefined,
-        pageNumber: pagination.page,
-        pageSize: pagination.rowsPerPage,
-        sortBy: 'lastName',
-        sortOrder: 'asc' as const,
+        pageNumber: pagination.value.page,
+        pageSize: pagination.value.rowsPerPage,
+        sortBy: pagination.value.sortBy,
+        sortOrder: pagination.value.descending ? 'desc' as const: 'asc' as const,
       };
-
-      await userStore.fetchUsers(searchParams);
-      pagination.rowsNumber = userStore.total;
+    
+      var store = await userStore.fetchUsers(searchParams);
+      pagination.value.rowsNumber = store.total;
     } catch (error) {
       $q.notify({
         type: 'negative',
@@ -222,19 +230,44 @@
   };
 
   const handlePaginationChange = async (newPagination: any) => {
-    pagination.page = newPagination.page;
-    pagination.rowsPerPage = newPagination.rowsPerPage;
+   
+    pagination.value.page = newPagination.page;
+    pagination.value.rowsPerPage = newPagination.rowsPerPage;
     await handleSearch();
   };
 
-  const openUserDialog = (user?: IUser) => {
+  const openUserDialog = async (user?: IUser) => {
+    
     editingUser.value = user || null;
+    if (user) {
+      try {
+        // Fetch user details by ID
+        const userData = await getUserById(user.id);
+        const varvar = userData.userRoles?.map((r) => r.role?.id) .filter((id): id is number => id !== undefined) || []
+        user?.userRoles.map((role) => role.roleId) || []
+        userForm.value = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          roles: userData.userRoles?.map((r) => r.role?.id) .filter((id): id is number => id !== undefined) || []
+        };
+        //roles: userData.userRoles?.map((r) => r.role?.name || '') || [],
+      } catch (error) {
+        $q.notify({
+          type: 'negative',
+          message: 'Failed to load user data',
+          position: 'top',
+        });
+        return;
+      }
+  } else {
     userForm.value = {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-      roles: user?.userRoles.map((role) => role.roleId) || [],
+      firstName: '',
+      lastName: '',
+      email: '',
+      roles: [],
     };
+  }
     userDialog.value = true;
   };
 
@@ -243,13 +276,27 @@
   };
 
   const saveUser = async () => {
+    
     try {
       if (!validateUserData(userForm.value)) {
         throw new Error('Please fill in all required fields');
       }
+      // const roleIds = userForm.value.roles.map((roleName) => {
+      //   const role = roleOptions.find((r) => r.name === roleName.toString());
+      //   return role ? role.id : null;
+      // }).filter((id) => (id) !== null)
+      // .map((id) => Number(id)); // Convert to integers
+
+      const userData: Partial<IUser> = {
+        firstName: userForm.value.firstName,
+        lastName: userForm.value.lastName,
+        email: userForm.value.email,
+        roleIDs: userForm.value.roles.map(Number)
+      };
 
       if (editingUser.value) {
-        await userStore.updateExistingUser(editingUser.value.id, userForm.value);
+        userData.id = editingUser.value.id;
+        const updatedUser = await updateUser(editingUser.value.id, userData);
         // Log user update action
         await auditService.logAction('USER', editingUser.value.id.toString(), 'update', {
           changes: userForm.value,
@@ -261,9 +308,9 @@
           position: 'top',
         });
       } else {
-        const newUser = await userStore.createNewUser(userForm.value);
+        const newUser = await createUser(userData);
         // Log user creation action
-        await auditService.logAction('USER', newUser.id.toString(), 'create', {
+        await auditService.logAction('USER', newUser.toString(), 'create', {
           userData: userForm.value,
         });
         $q.notify({
@@ -282,6 +329,26 @@
         position: 'top',
       });
     }
+  };
+
+  const onTableRequest = async (props: any) => {
+   
+    const { page, rowsPerPage, sortBy, descending } = props.pagination;
+
+    // Update pagination state
+    // pagination.page = page;
+    // pagination.rowsPerPage = rowsPerPage;
+    // pagination.sortBy = sortBy;
+    // pagination.descending = descending;
+    // Ensure pagination updates reactively
+    Object.assign(pagination.value, {
+      page,
+      rowsPerPage,
+      sortBy,
+      descending,
+    });
+
+    await handleSearch();
   };
 
   const confirmDelete = (user: IUser) => {
