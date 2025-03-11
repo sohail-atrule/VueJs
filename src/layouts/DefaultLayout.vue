@@ -38,7 +38,7 @@ const { currentUser, logout } = useAuth();
 const leftDrawerOpen = ref(false);
 
 const hasAdminAccess = computed(() => {
-  return currentUser.value?.userRoles.some(role => role.roleId === UserRoleType.Admin) ?? false;
+  return currentUser.value?.userRoles.some(role => role.name === UserRoleType.Admin) ?? false;
 });
 
 const breadcrumbs = computed(() => {

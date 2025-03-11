@@ -48,7 +48,6 @@ export class Equipment implements IEquipmentData {
     documents: EquipmentDocument[] = [];
 
     constructor(data: Partial<Equipment> = {}) {
-        debugger
         Object.assign(this, {
             ...this.getDefaults(),
             ...data,
@@ -107,4 +106,20 @@ export class Equipment implements IEquipmentData {
             documents: this.documents
         };
     }
+}
+
+export class EquipmentAssignment {
+    id: number = 0;
+    inspectorId: number = 0;
+    equipmentId: number = 0;
+    assignedTo: number = 0;
+    assignedDate: Date = new Date();
+    returnedDate: Date | null = null;
+    model:string ='';
+    assignmentCondition:string = '';
+    returnCondition:string = '';
+    notes: string = '';
+    isActive: boolean = false;
+
+    
 }

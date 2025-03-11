@@ -1,7 +1,7 @@
 <template>
-  <div 
-    class="equipment-list" 
-    role="region" 
+  <div
+    class="equipment-list"
+    role="region"
     aria-label="Equipment List"
     :aria-busy="loading"
   >
@@ -43,6 +43,7 @@
         <q-td :props="props">
           <q-btn-group flat>
             <q-btn
+            :disabled="true"
               v-if="!isInspector"
               flat
               round
@@ -60,7 +61,7 @@
               :disable="props.row.status?.toUpperCase() !== 'AVAILABLE'"
               @click.stop="handleAssignEquipment(props.row)"
             />
-            <q-btn
+            <!-- <q-btn
               flat
               round
               size="sm"
@@ -68,8 +69,17 @@
               :aria-label="t('equipment.actions.return')"
               :disable="props.row.status?.toUpperCase() !== 'IN_USE'"
               @click.stop="handleReturnEquipment(props.row)"
+            /> -->
+            <q-btn
+              flat
+              round
+              size="sm"
+              icon="keyboard_return"
+              :aria-label="t('equipment.actions.return')"
+              @click.stop="handleReturnEquipment(props.row)"
             />
             <q-btn
+            :disabled="true"
               v-if="!isInspector"
               flat
               round
@@ -85,7 +95,7 @@
     </q-table>
 
     <!-- Error Display -->
-    <div 
+    <div
       v-if="error"
       class="equipment-list__error"
       role="alert"
@@ -108,10 +118,10 @@ import SearchBar from '../common/SearchBar.vue';
 import { useEquipmentStore } from '@/stores/equipment.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { UserRoleType } from '@/models/user.model';
-import { Equipment } from '@/models/equipment.model';
+import { Equipment, EquipmentType } from '@/models/equipment.model';
 import { formatDate } from '@/utils/date.util';
 import { useRouter } from 'vue-router';
-
+import { EquipmentStatus } from '@/models/equipment.model';
 // Initialize composables
 const $q = useQuasar();
 const { t } = useI18n();
@@ -134,27 +144,27 @@ const tableColumns = computed(() => [
     label: t('equipment.fields.serial_number'),
     field: 'serialNumber',
     sortable: false,
-    align: 'left'
+    align: 'left' as const
   },
   {
     name: 'type',
     label: t('equipment.fields.type'),
     field: 'type',
     sortable: false,
-    align: 'left'
+    align: 'left' as const
   },
   {
     name: 'model',
     label: t('equipment.fields.model'),
     field: 'model',
     sortable: false,
-    align: 'left'
+    align: 'left' as const
   },
   {
     name: 'status',
     label: 'Status',
     field: 'status',
-    align: 'left',
+    align: 'left'  as const, 
     sortable: false
   },
   {
@@ -163,13 +173,13 @@ const tableColumns = computed(() => [
     field: 'lastMaintenanceDate',
     format: (val: Date) => formatDate(val),
     sortable: false,
-    align: 'left'
+    align: 'left' as const
   },
   {
     name: 'actions',
     label: t('equipment.fields.actions'),
     field: 'actions',
-    align: 'center'
+    align: 'center' as const
   }
 ]);
 
@@ -190,12 +200,12 @@ const filteredEquipment = computed(() => {
         const equipment = new Equipment({
           id: item.id,
           serialNumber: item.serialNumber,
-          model: item.name || item.model, // Handle both backend and frontend model names
+          model:  item.model, // item.name ?? Handle both backend and frontend model names
           type: item.type,
           condition: item.condition,
-          status: item.status?.toUpperCase(),
-          isActive: item.status !== 'retired',
-          isAvailable: item.status === 'available',
+          // status: item.status?.toUpperCase(),
+          isActive: item.status !== EquipmentStatus.RETIRED,
+          isAvailable: item.status === EquipmentStatus.AVAILABLE,
           purchaseDate: item.purchaseDate ? new Date(item.purchaseDate) : new Date(),
           lastMaintenanceDate: item.lastMaintenanceDate ? new Date(item.lastMaintenanceDate) : null,
           notes: item.notes,
@@ -214,7 +224,7 @@ const filteredEquipment = computed(() => {
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.serialNumber.toLowerCase().includes(query) ||
         item.model.toLowerCase().includes(query) ||
         item.type.toLowerCase().includes(query)
@@ -240,7 +250,7 @@ const handleSearchClear = () => {
 const handleEquipmentSelect = async (evt: Event, row: Equipment) => {
   try {
     console.log('Selected row data:', row); // Debug log
-    
+
     if (!row || !row.id) {
       console.error('No valid row data received:', row);
       $q.notify({
@@ -357,7 +367,7 @@ const emit = defineEmits<{
 
       .q-field {
         height: 100%;
-        
+
         &__control {
           height: 44px;
           background: white;
@@ -425,11 +435,11 @@ const emit = defineEmits<{
 // Deep selectors for Quasar components
 :deep(.q-table) {
   background-color: white;
-  
+
   thead {
     tr {
       background-color: var(--q-primary-light, #e3f2fd);
-      
+
       th {
         font-weight: 600;
         color: var(--q-primary, #1976d2);
@@ -443,7 +453,7 @@ const emit = defineEmits<{
   tbody {
     tr {
       transition: all 0.2s ease;
-      
+
       td {
         color: var(--q-dark, #1d1d1d);
         font-size: 0.875rem;
@@ -490,12 +500,12 @@ const emit = defineEmits<{
   .q-btn {
     padding: 8px;
     min-height: 36px;
-    
+
     &:hover {
       background-color: var(--q-primary-light, #e3f2fd);
       color: var(--q-primary);
     }
-    
+
     &[disabled] {
       opacity: 0.6;
       background-color: rgba(0, 0, 0, 0.03);
@@ -541,10 +551,10 @@ const emit = defineEmits<{
 
   :deep(.q-table) {
     background-color: var(--q-dark-page);
-    
+
     thead tr {
       background-color: var(--q-primary-dark, rgba(25, 118, 210, 0.2));
-      
+
       th {
         color: white;
         border-bottom: 2px solid rgba(255, 255, 255, 0.1);
@@ -571,7 +581,7 @@ const emit = defineEmits<{
 
     .q-btn {
       color: white;
-      
+
       &:hover {
         background-color: rgba(255, 255, 255, 0.1);
       }

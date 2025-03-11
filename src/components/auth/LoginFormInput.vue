@@ -24,7 +24,7 @@ export default defineComponent({
     return { isPwd };
   },
   render() {
-    const slots = {
+    const slots: { prepend: () => any; append?: () => any } = {
       prepend: () => h(QIcon, {
         name: this.type === 'email' ? 'mail' : 'lock',
         color: 'primary'
@@ -84,4 +84,4 @@ export default defineComponent({
     color: rgba(0, 0, 0, 0.6);
   }
 }
-</style> 
+</style>

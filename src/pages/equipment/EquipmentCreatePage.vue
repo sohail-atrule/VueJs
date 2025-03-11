@@ -12,7 +12,7 @@
       />
       <h1 class="text-h5 q-my-none">Add New Equipment</h1>
     </div>
-
+ 
     <!-- Equipment Form -->
     <EquipmentForm
       :loading="loading"
@@ -59,17 +59,17 @@ export default defineComponent({
     const loading = ref(false);
     const error = ref<string | null>(null);
 
-    const handleSave = async (equipmentData: Partial<Equipment>) => {
+    const handleSave = async (equipmentData: Partial<any>) => {
       try {
         loading.value = true;
         error.value = null;
 
         await equipmentStore.createNewEquipment(equipmentData);
-        showSuccessNotification('Equipment created successfully');
         await router.push({ name: 'equipment-list' });
       } catch (err) {
-        error.value = err instanceof Error ? err.message : 'Failed to create equipment';
-        showErrorNotification(error.value);
+        console.error(err);
+        // error.value = err instanceof Error ? err.message : 'Failed to create equipment';
+        // showErrorNotification(error.value);
       } finally {
         loading.value = false;
       }

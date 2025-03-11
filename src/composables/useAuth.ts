@@ -150,7 +150,6 @@ export function useAuth() {
   };
 
   const logout = async () => {
-    debugger
     isLoading.value = true;
     error.value = null;
 

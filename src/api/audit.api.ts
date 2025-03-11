@@ -17,7 +17,8 @@ import createError from 'http-errors';
 
 // API endpoint constants
 const API_VERSION = import.meta.env.VITE_APP_API_VERSION || 'v1';
-const BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:8080/api';
+const BASE_URL = import.meta.env.VITE_APP_API_URL;
+
 const API_ENDPOINTS = {
   AUDIT: `/${API_VERSION}/audit`,
   STATISTICS: `/${API_VERSION}/audit/statistics`,

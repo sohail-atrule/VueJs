@@ -1,3 +1,4 @@
+
 import { ref, computed } from 'vue'; // ^3.3.0
 import { Notify, useQuasar } from 'quasar'; // ^2.0.0
 import { useNotificationStore } from '../stores/notification.store';
@@ -15,6 +16,22 @@ const SCREEN_BREAKPOINTS = {
   md: 1024,
   lg: 1440
 };
+
+interface NotificationOptions {
+  message: string;
+  type?: NotificationType;
+  timeout?: number;
+  position?: NotificationPosition;
+  actions?: NotificationAction[];
+  multiLine?: boolean;
+  caption?: string;
+  html?: boolean;
+  progress?: boolean;
+  closeOnClick?: boolean;
+  attrs?: Record<string, unknown>;
+  onDismiss?: () => void;
+  onShow?: () => void;
+}
 
 export function useNotification() {
   const $q = useQuasar();
@@ -41,22 +58,6 @@ export function useNotification() {
       'aria-atomic': 'true'
     }
   };
-
-  interface NotificationOptions {
-    message: string;
-    type?: NotificationType;
-    timeout?: number;
-    position?: NotificationPosition;
-    actions?: NotificationAction[];
-    multiLine?: boolean;
-    caption?: string;
-    html?: boolean;
-    progress?: boolean;
-    closeOnClick?: boolean;
-    attrs?: Record<string, unknown>;
-    onDismiss?: () => void;
-    onShow?: () => void;
-  }
 
   const showNotification = (options: NotificationOptions): string => {
     const position = options.position || getResponsivePosition();
@@ -131,7 +132,6 @@ export function useNotification() {
 
   const dismissNotification = (id: string): void => {
     notificationStore.removeNotification(id);
-    Notify.dismiss(id);
   };
 
   const dismissAllNotifications = (): void => {

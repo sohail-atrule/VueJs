@@ -13,7 +13,7 @@ import type { AuthToken } from '../models/auth.model';
 import { AuthStatus, isTokenExpired } from '../models/auth.model';
 
 // Environment configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
 const API_VERSION = import.meta.env.VITE_APP_API_VERSION || 'v1';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_APP_API_TIMEOUT || '30000');
 const MAX_RETRY_ATTEMPTS = parseInt(import.meta.env.VITE_APP_API_RETRY_ATTEMPTS || '3');
@@ -114,7 +114,6 @@ const createApiInstance = (): AxiosInstance => {
  * @param token The authentication token to set
  */
 export const setAuthToken = (token: AuthToken): void => {
-    debugger
     if (!token || !token.accessToken || !token.refreshToken) {
         throw new Error('Invalid authentication token');
     }

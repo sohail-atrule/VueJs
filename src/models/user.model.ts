@@ -4,6 +4,8 @@
  * @version 1.0.0
  */
 
+import type { UserRole } from "@/models/user.model";
+
 /**
  * User model type definitions
  */
@@ -12,14 +14,15 @@
  * Represents a user in the system with full Azure AD B2C integration support
  * and audit tracking capabilities.
  */
-export type UserRole = {
-  id: number;
-  userId: number;
-  roleId: number;
-  assignedAt: Date;
-  revokedAt: Date | null;
-  role?: IRole;
-};
+// export type UserRole = {
+//   name: any;
+//   id: number;
+//   userId: number;
+//   roleId: number;
+//   assignedAt: Date;
+//   revokedAt: Date | null;
+//   role?: IRole;
+// };
 
 export interface IUser {
   /** Unique identifier for the user */
@@ -107,7 +110,7 @@ export enum UserRoleType {
   Admin = 1,
   Operations = 2,
   Inspector = 3,
-  CustomerService = 4,
+  CustomerService = 4
 }
 
 /**

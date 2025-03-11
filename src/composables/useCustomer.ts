@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Vue.js composable providing comprehensive customer management functionality
  * with reactive state, computed properties, and enhanced validation.
@@ -9,11 +10,11 @@ import { storeToRefs } from 'pinia'; // ^2.0.0
 import { debounce } from 'lodash'; // ^4.17.21
 import { useCustomerStore } from '../stores/customer.store';
 import { 
-  ICustomer, 
-  IContact, 
-  IContract, 
+  type ICustomer, 
+  // IContact, 
+  // IContract, 
   CustomerStatus, 
-  ValidationError 
+  // ValidationError 
 } from '../models/customer.model';
 
 /**
@@ -56,11 +57,11 @@ export function useCustomer() {
 
   // Computed properties
   const activeCustomers = computed(() => 
-    customers.value.filter(customer => customer.isActive)
+    Array.from(customers.value.values()).filter(customer => customer.isActive)
   );
 
   const inactiveCustomers = computed(() => 
-    customers.value.filter(customer => !customer.isActive)
+    Array.from(customers.value.values()).filter(customer => !customer.isActive)
   );
 
   const totalCustomers = computed(() => 
@@ -80,8 +81,8 @@ export function useCustomer() {
   });
 
   // Validation functions
-  const validateCustomer = (customer: Partial<ICustomer>): ValidationError[] => {
-    const errors: ValidationError[] = [];
+  const validateCustomer = (customer: Partial<ICustomer>): any => {
+    const errors = [];
 
     if (!customer.name?.trim()) {
       errors.push({ field: 'name', message: 'Customer name is required' });
@@ -101,13 +102,27 @@ export function useCustomer() {
   // Debounced search function
   const debouncedSearch = debounce(async () => {
     filters.value = { ...filters.value, ...searchParams.value };
-    await customerStore.fetchCustomers();
+    await customerStore.fetchCustomers({
+      region: filters.value.region,
+      status: filters.value.status,
+      search: filters.value.search,
+      industry: filters.value.industry,
+      page: pagination.value.page,
+      pageSize: pagination.value.limit,
+    });
   }, 300);
 
   // Customer management functions
   const fetchCustomers = async () => {
     try {
-      await customerStore.fetchCustomers();
+      await customerStore.fetchCustomers({
+        region: filters.value.region,
+        status: filters.value.status,
+        search: filters.value.search,
+        industry: filters.value.industry,
+        page: pagination.value.page,
+        pageSize: pagination.value.limit,
+      });
     } catch (err) {
       console.error('Error fetching customers:', err);
       throw err;
@@ -221,7 +236,6 @@ export function useCustomer() {
     debouncedSearch,
 
     // Store actions
-    updateFilters: customerStore.updateFilters,
     updateSorting: customerStore.updateSorting,
     updatePagination: customerStore.updatePagination,
     resetState: customerStore.resetState

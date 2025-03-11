@@ -8,7 +8,7 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex flex-center q-pa-xl">
+    <div v-if="isLoading" class="flex flex-center q-pa-xl">
       <q-spinner size="3em" color="primary" />
       <span class="sr-only">Loading inspectors...</span>
     </div>
@@ -17,7 +17,7 @@
     <template v-else>
       <InspectorList
         :inspectors="inspectors"
-        :loading="loading"
+        :loading="isLoading"
         @select="handleInspectorSelect"
         @filter="handleFilterChange"
         @location-search="handleLocationSearch"
@@ -87,7 +87,7 @@ export default defineComponent({
     // Initialize inspector composable
     const {
       inspectors,
-      loading,
+      isLoading,
       error,
       searchInspectors,
       selectInspector,
@@ -251,7 +251,7 @@ export default defineComponent({
 
     return {
       inspectors,
-      loading,
+      isLoading,
       error,
       handleInspectorSelect,
       handleLocationSearch,

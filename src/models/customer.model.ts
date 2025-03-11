@@ -46,38 +46,66 @@ export interface IContact {
 /**
  * Interface representing a customer contract
  */
-// export interface IContract {
+export interface IContract {
+  id: number;
+  contractNumber: string;
+  customerId: number;
+  description: string;
+  value: number;
+  startDate: string;
+  endDate: string;
+  status: ContractStatus;
+  isActive: boolean;
+  createdAt: Date;
+  modifiedAt: Date | null;
+  terms: string;
+  attachments: Array<{
+    id: number;
+    name: string;
+    url: string;
+  }>;
+}
+
+// export interface ICustomer {
+//   status(status: any): unknown;
+//   modifiedAt(modifiedAt: any): unknown;
+//   contracts: any[];
+//   contacts: any[];
 //   id: number;
-//   contractNumber: string;
-//   customerId: number;
-//   description: string;
-//   value: number;
-//   startDate: Date;
-//   endDate: Date;
-//   status: ContractStatus;
+//   code: string;
+//   name: string;
+//   industry: string;
+//   region: string;
+//   address: string;
+//   city: string;
 //   isActive: boolean;
+//   state: string;
+//   postalCode: string;
+//   country: string;
+//   createdBy: string;
 //   createdAt: Date;
-//   modifiedAt: Date | null;
-//   terms: string;
-//   attachments: Array<{
-//     id: number;
-//     name: string;
-//     url: string;
-//   }>;
 // }
 
 export interface ICustomer {
-  code: string;          
-  name: string;          
-  industry: string;      
-  region: string;       
-  address: string;      
-  city: string;         
-  state: string;        
-  postalCode: string;   
-  country: string;      
-  createdBy: string;    
-  createdAt: Date;     
+  contacts: any[];
+  contracts: any[];
+  modifiedAt(modifiedAt: any): unknown;
+  id: number;
+  code: string;
+  name: string;
+  industry: string;
+  region: string;
+  address: string;
+  city: string;
+  state: string;
+  status: string;
+  isActive: boolean;
+  securityLevel: string;
+  complianceRequirements: [];
+  postalCode: string;
+  country: string;
+  createdBy: string;
+  createdAt: Date;
 }
 
 /**

@@ -2,7 +2,7 @@
   <q-dialog v-model="dialogVisible" persistent>
     <q-card class="assignment-form" style="min-width: 400px">
       <q-card-section class="row items-center">
-        <div class="text-h6">Assign Equipment</div>
+        <div class="text-h6">Assign Equipment 1</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup aria-label="Close dialog" />
       </q-card-section>
@@ -135,10 +135,12 @@
 
 <script lang="ts">
 import { ref, computed, defineComponent, defineProps, defineEmits, watch } from 'vue'; // v3.x
-import { useQuasar } from '@quasar/app'; // v2.x
-import { date } from '@quasar/app'; // v2.x
+// import { useQuasar } from '@quasar/app'; // v2.x
+// import { date } from '@quasar/app'; // v2.x
+import { useQuasar } from 'quasar';
+import { date } from 'quasar';
 import { Equipment, EquipmentAssignment } from '../../models/equipment.model';
-import { Inspector, InspectorStatus } from '../../models/inspector.model';
+import type { Inspector, InspectorStatus } from '../../models/inspector.model';
 import { useEquipment } from '../../composables/useEquipment';
 
 export default defineComponent({
@@ -166,6 +168,11 @@ export default defineComponent({
       get: () => props.modelValue,
       set: (value) => emit('update:modelValue', value)
     });
+    const availableInspectors = ref([
+      { id: 1, label: "John Doe" },
+      { id: 2, label: "Jane Smith" },
+      { id: 3, label: "Alex Johnson" },
+    ]);
     const selectedInspectorId = ref<number | null>(null);
     const startDate = ref('');
     const endDate = ref('');
@@ -249,9 +256,12 @@ export default defineComponent({
           assignmentCondition: condition.value,
           returnCondition: null,
           notes: notes.value,
-          isActive: true
+          isActive: true,
+          assignedTo: selectedInspectorId.value! 
+          ,model:''
         };
-
+        
+        //route.params.id = props.equipmentId;
         await assignEquipment(assignment);
         emit('assigned');
         dialogVisible.value = false;
@@ -307,7 +317,8 @@ export default defineComponent({
       isValidStartDate,
       isValidEndDate,
       handleSubmit,
-      resetForm
+      resetForm,
+      availableInspectors
     };
   }
 });

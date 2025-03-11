@@ -32,7 +32,7 @@ interface CachedSearchResult {
 
 // Interface for store state
 interface InspectorState {
-    inspectors: [];
+    inspectors: Inspector[];
     selectedInspector: Inspector | null;
     loading: boolean;
     searchLoading: boolean;
@@ -80,11 +80,11 @@ export const useInspectorStore = defineStore('inspector', {
         allInspectors: (state): Inspector[] => state.inspectors,
         currentInspector: (state): Inspector | null => state.selectedInspector,
         isSearching: (state): boolean => state.searchLoading,
-        totalPages: (state): number => 
+        totalPages: (state): number =>
             Math.ceil(state.totalItems / (state.lastSearch?.pageSize || DEFAULT_PAGE_SIZE)),
-        inspectorsByStatus: (state) => (status: InspectorStatus) => 
+        inspectorsByStatus: (state) => (status: InspectorStatus) =>
             state.inspectors.filter((inspector: Inspector) => inspector.status === status),
-        activeInspectors: (state): Inspector[] => 
+        activeInspectors: (state): Inspector[] =>
             state.inspectors.filter((inspector: Inspector) => inspector.isActive)
     },
 
@@ -95,9 +95,10 @@ export const useInspectorStore = defineStore('inspector', {
             status: InspectorStatus[] | null,
             certifications: string[],
             includeUnavailable = null,
-            search?: string
+            search?: string,
+            currentPage : number = 1,
+            pageSize : number = DEFAULT_PAGE_SIZE
         ) {
-            debugger
             this.loading = true;
             try {
                 const response = await searchInspectors({

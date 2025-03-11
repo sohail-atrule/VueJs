@@ -4,7 +4,6 @@
     <div class="row items-center justify-between q-mb-md">
       <h1 class="text-h5 q-my-none">Equipment Management</h1>
       <q-btn
-        v-if="canCreateEquipment"
         color="primary"
         icon="add"
         label="Add Equipment"
@@ -15,12 +14,12 @@
     </div>
 
     <!-- Filter Panel -->
-    <FilterPanel
+    <!-- <FilterPanel
       filter-type="equipment"
       @filter="handleFilterChange"
       @reset="handleFilterReset"
       class="q-mb-md"
-    />
+    /> -->
 
     <!-- Equipment List Component -->
     <EquipmentList
@@ -85,9 +84,9 @@ export default defineComponent({
     const error = ref<string | null>(null);
 
     // Computed properties
-    const canCreateEquipment = computed(() => 
-      authStore.hasRole('Admin') || authStore.hasRole('Operations')
-    );
+    // const canCreateEquipment = computed(() => 
+    //   authStore.hasRole('Admin') || authStore.hasRole('Operations')
+    // );
 
     // Initialize component
     const initializeComponent = async () => {
@@ -142,9 +141,9 @@ export default defineComponent({
 
     const handleCreateEquipment = async () => {
       try {
-        if (!canCreateEquipment.value) {
-          throw new Error('Insufficient permissions');
-        }
+        //if (!canCreateEquipment.value) {
+        //  throw new Error('Insufficient permissions');
+        //}
         await router.push({ name: 'equipment-create' });
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Failed to create equipment';
@@ -157,7 +156,6 @@ export default defineComponent({
     };
 
     const handleFilterChange = async (filters: Record<string, any>) => {
-      debugger
       try {
         loading.value = true;
         error.value = null;
@@ -221,6 +219,7 @@ export default defineComponent({
     };
 
     const handleAssignEquipment = async (equipment: Equipment) => {
+      
       try {
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
@@ -240,6 +239,7 @@ export default defineComponent({
     };
 
     const handleReturnEquipment = async (equipment: Equipment) => {
+      
       try {
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
@@ -289,7 +289,6 @@ export default defineComponent({
     return {
       loading,
       error,
-      canCreateEquipment,
       equipmentListRef,
       handleEquipmentSelected,
       handleCreateEquipment,

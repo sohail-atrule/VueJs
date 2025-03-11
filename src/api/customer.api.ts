@@ -14,7 +14,8 @@ import axios from 'axios';
 // Cache configuration
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 const cache = new Map<string, { data: any; timestamp: number }>();
-
+const API_VERSION = 'v1';
+const API_BASE_PATH = `/${API_VERSION}/Customers`;
 interface CustomerApiResponse {
   items: ICustomer[];
   total: number;
@@ -32,10 +33,6 @@ interface CustomerParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
-
-
-
-const Base_Url = 'http://192.168.10.154:5235/api/v1';
 
 /**
  * Retrieves a paginated and filtered list of customers
@@ -63,13 +60,12 @@ export const getCustomers = async ({
   page: number;
   pageSize: number;
 }): Promise<any> => {
-  debugger
   try {
     // Ensure industry and other parameters are correctly set
     const params: Record<string, any> = {
-      region: region || "North",       
-      status: status || "Active",        
-      industry: industry || " ",      
+      region: region || "North",
+      status: status || "Active",
+      industry: industry || " ",
       searchTerm:search,
       page,
       pageSize,
@@ -78,9 +74,9 @@ export const getCustomers = async ({
     console.log('API Call Params:', params);
 
     // Make the API call with dynamic query parameters
-    const response = await axios.get(`${Base_Url}/Customers`, { params });
-    var c = response.data.totalCount;
-    debugger
+    // const response = await axios.get(, { params });
+    const response = await api.get(API_BASE_PATH, { params });
+
     //return response.data.customers as CustomerApiResponse;
     return {
       customers: response.data.customers,
@@ -128,7 +124,7 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
   }
 
   // const response = await api.get(`/v1/customers/${id}`);
-  const response = await axios.get(`${Base_Url}/Customers/${id}`);
+  const response = await api.get(`/v1/Customers/${id}`);
   cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
   return response.data;
 };
@@ -145,7 +141,7 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
 // };
 
 export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt' | 'modifiedAt'>): Promise<ICustomer> => {
-  const response = await axios.post(`${Base_Url}/Customers`, customer);
+  const response = await api.post(`/v1/Customers`, customer);
   invalidateCustomerCache();
   return response.data;
 };
@@ -157,8 +153,8 @@ export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt
  * @returns Promise resolving to updated customer
  */
 export const updateCustomer = async (id: number, updates: Partial<any>): Promise<ICustomer> => {
-  // const response = await api.put(`/v1/customers/${id}`, updates);
-  const response = await axios.put(`${Base_Url}/Customers/${id}`, updates);
+  const response = await api.put(`/v1/customers/${id}`, updates);
+  //const response = await axios.put(`v1/Customers/${id}`, updates);
   invalidateCustomerCache(id);
   return response.data;
 };
@@ -170,7 +166,7 @@ export const updateCustomer = async (id: number, updates: Partial<any>): Promise
  */
 export const deleteCustomer = async (id: number): Promise<void> => {
   // await api.delete(`/v1/customers/${id}`);
-  await axios.delete(`${Base_Url}/Customers/${id}`);
+  await api.delete(`/v1/Customers/${id}`);
   invalidateCustomerCache(id);
 };
 
@@ -184,7 +180,7 @@ export const createContact = async (
   customerId: number,
   contact: Omit<IContact, 'id' | 'customerId' | 'createdAt' | 'modifiedAt'>
 ): Promise<IContact> => {
-  const response = await api.post(`/v1/customers/${customerId}/contacts`, contact);
+  const response = await api.post(`/api/v1/customers/${customerId}/contacts`, contact);
   invalidateCustomerCache(customerId);
   return response.data;
 };
@@ -201,7 +197,7 @@ export const updateContact = async (
   contactId: number,
   contact: Partial<IContact>
 ): Promise<IContact> => {
-  const response = await api.put(`/v1/customers/${customerId}/contacts/${contactId}`, contact);
+  const response = await api.put(`/api/v1/customers/${customerId}/contacts/${contactId}`, contact);
   invalidateCustomerCache(customerId);
   return response.data;
 };
@@ -216,7 +212,7 @@ export const createContract = async (
   customerId: number,
   contract: Omit<IContract, 'id' | 'customerId' | 'createdAt' | 'modifiedAt'>
 ): Promise<IContract> => {
-  const response = await api.post(`/v1/customers/${customerId}/contracts`, contract);
+  const response = await api.post(`/api/v1/customers/${customerId}/contracts`, contract);
   invalidateCustomerCache(customerId);
   return response.data;
 };

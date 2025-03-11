@@ -40,6 +40,7 @@ declare module '@/models/user.model' {
     }
 
     export interface UserRole {
+        name?: any;
         id: number;
         userId: number;
         roleId: number;
@@ -51,4 +52,4 @@ declare module '@/models/user.model' {
     export function hasRole(user: IUser, role: UserRoleType): boolean;
     export function getRoleId(role: UserRoleType): number;
     export function getRoleType(roleId: number): UserRoleType;
-} 
+}

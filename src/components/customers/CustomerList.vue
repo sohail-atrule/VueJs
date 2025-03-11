@@ -179,7 +179,7 @@
     rowsNumber: 0,
   });
   const onTableRequest = async (props: any) => {
-    debugger
+    
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
     // Update pagination state reactively
@@ -199,7 +199,7 @@
       name: 'code',
       field: 'code',
       label: t('customer.fields.code'),
-      align: 'left',
+      align: 'left' as const,
       sortable: false,
       required: true,
     },
@@ -207,7 +207,7 @@
       name: 'name',
       field: 'name',
       label: t('customer.fields.name'),
-      align: 'left',
+      align: 'left' as const,
       sortable: false,
       required: true,
     },
@@ -215,21 +215,21 @@
       name: 'region',
       field: 'region',
       label: t('customer.fields.region'),
-      align: 'left',
+      align: 'left' as const,
       sortable: false
     },
     {
       name: 'status',
       field: (row: any) => (row.isActive ? 'ACTIVE' : 'INACTIVE'),
       label: t('customer.fields.status'),
-      align: 'center',
+      align: 'center' as const,
       sortable: false
     },
     {
       name: 'actions',
       field: 'actions',
       label: t('customer.fields.actions'),
-      align: 'center',
+      align: 'center' as const,
       required: true,
     },
   ];
@@ -328,7 +328,7 @@
   const handleEditCustomer = (customer: ICustomer) => {
     router.push({
       name: 'edit-customer',
-      params: { id: customer.id.toString() },
+      params: { id: customer.id  },
     });
   };
 
@@ -376,7 +376,6 @@
 
   const fetchCustomers = async () => {
   try {
-    debugger
     const response = await customerStore.fetchCustomers({
       region: filters.value.region,
       status: filters.value.status,

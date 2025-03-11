@@ -29,7 +29,7 @@
       emit-value
       map-options
       aria-required="true"
-      :disable="isProcessing"
+      :disable="loading"
     />
 
     <!-- Return Notes -->
@@ -47,7 +47,7 @@
       autogrow
       class="q-mb-md"
       aria-required="true"
-      :disable="isProcessing"
+      :disable="loading"
     />
 
     <!-- Form Actions -->
@@ -56,7 +56,7 @@
         flat
         :label="t('common.cancel')"
         color="grey"
-        :disable="isProcessing"
+        :disable="loading"
         @click="cancelReturn"
         data-cy="cancel-return"
       />
@@ -64,8 +64,8 @@
         type="submit"
         :label="t('equipment.return.submit')"
         color="primary"
-        :loading="isProcessing"
-        :disable="!isValid || isProcessing"
+        :loading="loading"
+        :disable="!isValid || loading"
         data-cy="submit-return"
       >
         <template #loading>
@@ -79,8 +79,9 @@
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue'; // v3.x
 import { useI18n } from 'vue-i18n'; // v9.x
-import { QForm, QInput, QSelect, QBtn, QSpinner } from '@quasar/components'; // v2.x
-import { Equipment, EquipmentAssignment } from '../../models/equipment.model';
+// import { QForm, QInput, QSelect, QBtn, QSpinner } from '@quasar/components'; // v2.x
+import {QForm, QInput, QSelect, QBtn, QSpinner} from 'quasar'; // v2.x
+import { Equipment } from '../../models/equipment.model';
 import { useEquipment } from '../../composables/useEquipment';
 import { useNotification } from '../../composables/useNotification';
 
@@ -97,9 +98,9 @@ export default defineComponent({
 
   props: {
     assignment: {
-      type: Object as () => EquipmentAssignment,
+      type: Object,
       required: true,
-      validator: (value: EquipmentAssignment) => {
+      validator: (value: any) => {
         return !!value && !!value.id && !!value.equipmentId;
       }
     }
@@ -113,8 +114,8 @@ export default defineComponent({
 
   setup(props, { emit }) {
     const { t } = useI18n();
-    const { returnEquipment, isProcessing } = useEquipment();
-    const { showError, showSuccess } = useNotification();
+    const { returnEquipment, loading } = useEquipment();
+    const { showErrorNotification, showSuccessNotification } = useNotification();
 
     // Form refs and state
     const returnForm = ref<typeof QForm | null>(null);
@@ -127,11 +128,11 @@ export default defineComponent({
 
     // Condition options for selection
     const conditionOptions = [
-      { label: t('equipment.condition.excellent'), value: 'Excellent' },
-      { label: t('equipment.condition.good'), value: 'Good' },
-      { label: t('equipment.condition.fair'), value: 'Fair' },
-      { label: t('equipment.condition.poor'), value: 'Poor' },
-      { label: t('equipment.condition.damaged'), value: 'Damaged' }
+      { label: t('equipment.condition.new'), value: 'New' },
+      { label: t('equipment.condition.Used'), value: 'Used' },
+      { label: t('equipment.condition.Refurbished'), value: 'Refurbished' },
+      // { label: t('equipment.condition.poor'), value: 'Poor' },
+      // { label: t('equipment.condition.damaged'), value: 'Damaged' }
     ];
 
     // Computed properties
@@ -168,21 +169,19 @@ export default defineComponent({
       }
 
       try {
-        const success = await returnEquipment(props.assignment.id, {
+        await returnEquipment(props.assignment.id, {
           returnCondition: returnCondition.value,
-          notes: notes.value
+          notes: notes.value,
+          equipmentId: props.assignment.equipmentId,
+          returnDate: new Date()
         });
 
-        if (success) {
-          showSuccess(t('equipment.return.success'));
-          emit('return-submitted', true);
-          resetForm();
-        } else {
-          throw new Error(t('equipment.return.genericError'));
-        }
+        showSuccessNotification(t('equipment.return.success'));
+        emit('return-submitted', true);
+        resetForm();
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : t('equipment.return.genericError');
-        showError(errorMessage);
+        showErrorNotification(errorMessage);
         emit('return-error', errorMessage);
       }
     };
@@ -212,7 +211,7 @@ export default defineComponent({
       returnCondition,
       notes,
       errors,
-      isProcessing,
+      loading,
       
       // Computed
       isValid,

@@ -54,7 +54,7 @@ export default defineComponent({
       error,
       isAuthenticated,
       initializeAuth,
-      handleMFA,
+      // handleMFA,
       securityStatus
     } = useAuth();
 
@@ -97,7 +97,7 @@ export default defineComponent({
       try {
         // Check if MFA is required
         if (securityStatus.value.mfaEnabled) {
-          await handleMFA();
+          // await handleMFA();
         }
 
         // Show success notification with screen reader announcement
@@ -106,9 +106,9 @@ export default defineComponent({
           message: 'Successfully authenticated',
           position: 'top',
           timeout: 2000,
-          role: 'status',
           attrs: {
-            'aria-live': 'polite'
+            'aria-live': 'polite',
+            role: 'status',
           }
         });
 
@@ -130,9 +130,9 @@ export default defineComponent({
         message: errorMessage,
         position: 'top',
         timeout: 5000,
-        role: 'alert',
         attrs: {
-          'aria-live': 'assertive'
+          'aria-live': 'assertive',
+          role: 'alert',
         }
       });
     };

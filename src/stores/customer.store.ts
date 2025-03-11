@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Pinia store for managing customer-related state and operations.
  * Implements comprehensive customer data management with optimistic updates and enhanced error handling.
@@ -38,6 +39,7 @@ interface FilterState {
   search: string;
   region: string;
   status: CustomerStatus | null;
+  industry : string;
 }
 
 /**
@@ -65,7 +67,7 @@ interface CustomerState {
  * Pinia store for managing customer state
  */
 export const useCustomerStore = defineStore('customer', {
-  state: (): any => ({
+  state: () : CustomerState => ({
     customers: new Map(),
     loading: false,
     error: null,
@@ -73,7 +75,8 @@ export const useCustomerStore = defineStore('customer', {
     filters: {
       search: '',
       region: '',
-      status: null
+      status: null,
+      industry : ''
     },
     pagination: {
       page: 1,
@@ -120,7 +123,7 @@ export const useCustomerStore = defineStore('customer', {
         page: number;
         pageSize: number;
       }
-    ): Promise<void> {
+    ): Promise<any> {
       try {
         this.loading = true; 
         this.error = null; 
@@ -278,7 +281,14 @@ export const useCustomerStore = defineStore('customer', {
      */
     async updateSorting(field: string, order: 'asc' | 'desc'): Promise<void> {
       this.sorting = { field, order };
-      await this.fetchCustomers();
+      await this.fetchCustomers({
+        region: this.filters.region,
+        status: this.filters.status,
+        search: this.filters.search,
+        industry: this.filters.search,
+        page: this.pagination.page,
+        pageSize: this.pagination.limit,
+      });
     },
 
     /**
@@ -308,7 +318,8 @@ export const useCustomerStore = defineStore('customer', {
       this.filters = {
         search: '',
         region: '',
-        status: null
+        status: null,
+        industry : ''
       };
       this.pagination = {
         page: 1,

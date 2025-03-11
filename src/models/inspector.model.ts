@@ -49,6 +49,8 @@ export interface DrugTest {
 export interface Inspector {
     id: number;
     userId: number;
+    firstName: string;
+    lastName: string;
     status: InspectorStatus;
     location: GeographyPoint;
     badgeNumber: string;

@@ -22,7 +22,7 @@ export function useInspector() {
   // Reactive state
   const searchLocation = ref<GeographyPoint | null>(null);
   const searchRadius = ref<number>(DEFAULT_SEARCH_RADIUS);
-  const selectedStatus = ref<InspectorStatus | null>(null);
+  const selectedStatus = ref<InspectorStatus[] | null>(null);
   const selectedCertifications = ref<string[]>([]);
   const isActive = ref<boolean | null>(null);
   const error = ref<Error | null>(null);
@@ -72,13 +72,13 @@ export function useInspector() {
     try {
       error.value = null;
       validateSearchParams(searchLocation.value, searchRadius.value);
-
       await inspectorStore.searchInspectors(
         searchLocation.value,
         searchRadius.value,
         selectedStatus.value,
         selectedCertifications.value,
         isActive.value,
+        '',
         currentPage.value,
         pageSize.value
       );
@@ -107,7 +107,7 @@ export function useInspector() {
   /**
    * Updates selected inspector status filter
    */
-  const setSelectedStatus = (status: InspectorStatus | null): void => {
+  const setSelectedStatus = (status: InspectorStatus[] | null): void => {
     selectedStatus.value = status;
     searchInspectors();
   };

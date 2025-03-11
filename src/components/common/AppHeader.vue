@@ -181,7 +181,7 @@ const sessionCheckInterval = ref<number | null>(null);
 
 // Computed
 const hasAdminAccess = computed(() => {
-  return currentUser.value?.userRoles.some(role => role.roleId === UserRoleType.Admin) ?? false;
+  return currentUser.value?.userRoles.some(role => role.roleId === Number(UserRoleType.Admin)) ?? false;
 });
 
 const showBreadcrumbs = computed(() => {
@@ -230,8 +230,8 @@ const handlePreferences = () => {
 const updateSecurityStatus = async () => {
   const isValid = await validateSession();
   securityStatus.value = {
-    isValid,
-    lastCheck: new Date()
+    isValid
+    // ,lastCheck: new Date()
   };
 
   if (!isValid) {

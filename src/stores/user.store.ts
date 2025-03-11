@@ -52,7 +52,6 @@ export const useUserStore = defineStore('user', () => {
 
   // Actions
   const fetchUsers = async (params: Partial<SearchParams> = {}, forceRefresh = false) => {
-   debugger
     // if (!forceRefresh && isCacheValid.value) {
     //   return { users: users.value, total: total.value };
     // }
@@ -121,7 +120,6 @@ export const useUserStore = defineStore('user', () => {
   };
 
   const removeUser = async (id: number): Promise<void> => {
-    debugger
     loading.value = true;
     error.value = null;
 

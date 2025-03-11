@@ -76,7 +76,6 @@ async function handleSubmit(e: Event) {
   error.value = '';
 
   try {
-
     const res = await login({ email: email.value, password: password.value });
     console.log(res);
 

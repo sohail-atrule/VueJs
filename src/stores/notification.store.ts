@@ -25,7 +25,7 @@ export const NOTIFICATION_POSITIONS = [
 
 export const DEFAULT_NOTIFICATION_OPTIONS = {
   timeout: 5000,
-  position: 'top-right',
+  position: 'top-right' as NotificationPosition,
   closeOnClick: true,
   progress: true,
   group: false,
@@ -65,6 +65,7 @@ export interface Notification {
   actions?: NotificationAction[];
   attrs?: Record<string, unknown>;
   onDismiss?: () => void;
+  onShow?: () => void; 
 }
 
 export interface NotificationState {

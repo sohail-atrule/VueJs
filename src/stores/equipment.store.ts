@@ -8,14 +8,14 @@ import { defineStore } from 'pinia'; // ^2.1.0
 import { ref, computed, watch } from 'vue'; // ^3.3.0
 import { Equipment, EquipmentType, EquipmentStatus } from '../models/equipment.model';
 import type { EquipmentAssignment, EquipmentHistory } from '../models/equipment-types';
-import { 
-  getEquipmentList, 
-  getEquipmentById, 
-  createEquipment, 
-  updateEquipment, 
-  assignEquipment, 
-  returnEquipment, 
-  getEquipmentHistory 
+import {
+  getEquipmentList,
+  getEquipmentById,
+  createEquipment,
+  updateEquipment,
+  assignEquipment,
+  returnEquipment,
+  getEquipmentHistory
 } from '../api/equipment.api';
 import { useNotificationStore } from './notification.store';
 
@@ -52,15 +52,15 @@ export const useEquipmentStore = defineStore('equipment', () => {
   const notificationStore = useNotificationStore();
 
   // Computed properties
-  const availableEquipment = computed(() => 
+  const availableEquipment = computed(() =>
     equipment.value.filter(item => item.status === 'AVAILABLE')
   );
 
-  const assignedEquipment = computed(() => 
+  const assignedEquipment = computed(() =>
     equipment.value.filter(item => item.status !== 'AVAILABLE')
   );
 
-  const maintenanceRequired = computed(() => 
+  const maintenanceRequired = computed(() =>
     equipment.value.filter(item => {
       const lastMaintenance = new Date(item.lastMaintenanceDate || 0);
       const threeMonthsAgo = new Date();
@@ -86,7 +86,6 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
   // Actions
   const loadEquipment = async (forceRefresh = false, filters: Record<string, any> = {}) => {
-    debugger
     // if (!forceRefresh && isCacheValid.value) {
     //   return equipment.value;
     // }
@@ -112,12 +111,12 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
       lastSync.value = new Date();
       retryCount.value = 0;
-      
+
       if (forceRefresh) {
         notificationStore.success('Equipment list updated successfully');
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       error.value = errorMessage;
       notificationStore.error('Failed to load equipment list');
       if (retryCount.value < MAX_RETRY_ATTEMPTS) {
@@ -130,10 +129,10 @@ export const useEquipmentStore = defineStore('equipment', () => {
   };
 
   const selectEquipment = async (id: number) => {
-    if (cache.value[id]) {
-      selectedEquipment.value = cache.value[id];
-      return;
-    }
+    // if (cache.value[id]) {
+    //   selectedEquipment.value = cache.value[id];
+    //   return;
+    // }
 
     loading.value = true;
     error.value = null;
@@ -142,28 +141,34 @@ export const useEquipmentStore = defineStore('equipment', () => {
       const response = await getEquipmentById(id);
       selectedEquipment.value = response;
       cache.value[id] = response;
-    } catch (error: unknown) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       error.value = errorMessage;
       notificationStore.error(`Failed to load equipment details: ${errorMessage}`);
     } finally {
       loading.value = false;
-    }
+    } 
   };
 
-  const createNewEquipment = async (equipmentData: Omit<Equipment, 'id'>) => {
+   let isSaving = false;
+
+  const createNewEquipment = async (equipmentData: Omit<any, 'id'>) => {
+   
+    if (isSaving) return; 
+      isSaving = true;
+
     loading.value = true;
     error.value = null;
 
     try {
       const response = await createEquipment(equipmentData);
-      equipment.value.push(response);
-      cache.value[response.id] = response;
+      // equipment.value.push(response);
+      // cache.value[response.id] = response;
       notificationStore.success('Equipment created successfully');
       return response;
     } catch (err) {
-      error.value = err.message;
-      notificationStore.error(`Failed to create equipment: ${err.message}`);
+      // error.value = err.message;
+      // notificationStore.error(`Failed to create equipment: ${err.message}`);
       throw err;
     } finally {
       loading.value = false;
@@ -198,7 +203,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
     try {
       const response = await assignEquipment(assignment);
-      assignments.value.push(response);
+      // assignments.value.push(response);
       // Update equipment availability
       const equipmentIndex = equipment.value.findIndex(item => item.id === assignment.equipmentId);
       if (equipmentIndex !== -1) {
@@ -207,7 +212,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
       }
       notificationStore.success('Equipment assigned successfully');
       return response;
-    } catch (error: unknown) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       error.value = errorMessage;
       notificationStore.error(`Failed to assign equipment: ${errorMessage}`);
@@ -219,14 +224,14 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
   const processEquipmentReturn = async (
     equipmentId: number,
-    returnDetails: { returnCondition: string; notes?: string }
+    returnDetails: { returnCondition: string; notes?: string; equipmentId: number; returnDate: Date }
   ) => {
     loading.value = true;
     error.value = null;
 
     try {
       const response = await returnEquipment(equipmentId, returnDetails);
-      
+
       // Update equipment availability
       const equipmentIndex = equipment.value.findIndex(item => item.id === equipmentId);
       if (equipmentIndex !== -1) {
@@ -234,10 +239,10 @@ export const useEquipmentStore = defineStore('equipment', () => {
         equipment.value[equipmentIndex].condition = returnDetails.returnCondition;
         cache.value[equipmentId] = equipment.value[equipmentIndex];
       }
-      
+
       notificationStore.success('Equipment return processed successfully');
       return response;
-    } catch (error: unknown) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       error.value = errorMessage;
       notificationStore.error(`Failed to process equipment return: ${errorMessage}`);
@@ -281,7 +286,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
     }
 
     subscribers.value.add(callback);
-    
+
     // Initial callback with current data
     try {
       // Create proper Equipment instances with date handling
@@ -305,7 +310,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
     } catch (error) {
       console.error('Error in subscription callback:', error);
     }
-    
+
     // Return unsubscribe function
     return () => {
       subscribers.value.delete(callback);
@@ -330,7 +335,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
           return null;
         }
       }).filter((item): item is Equipment => item !== null);
-      
+
       subscribers.value.forEach(callback => {
         try {
           callback(equipmentInstances);

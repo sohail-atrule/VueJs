@@ -4,7 +4,7 @@
   <QBtn
     color="primary"
     label="Create"
-    @click.stop="handleViewCreateInspector"
+    @click.stop="handleViewCreateInspector($event)"
   />
 </div>
     <!-- Search and Filter Section -->
@@ -215,35 +215,34 @@
 };
 
   // Table column definitions with accessibility support
-  debugger
   const tableColumns = computed(() => [
     {
       name: 'badgeNumber',
       label: 'Badge',
       field: 'badgeNumber',
       sortable: false,
-      align: 'left',
+      align: 'left' as const,
     },
     {
       name: 'name',
       label: 'Inspector Name',
       field: (row: any) => `${row.firstName} ${row.lastName}`,
       sortable: false,
-      align: 'left',
+      align: 'left' as const,
     },
     {
       name: 'status',
       label: 'Status',
       field: (row: any) => statusMap[row.status] ?? 'Inactive',
       sortable: false,
-      align: 'center',
+      align: 'center' as const,
     },
     {
       name: 'location',
       label: 'Location',
       field: (row: any) => formatLocationData(row.location),
       sortable: false,
-      align: 'left',
+      align: 'left'as const,
     },
     {
       name: 'lastDrugTest',
@@ -251,13 +250,13 @@
       field: 'lastDrugTestDate',
       format: (val: Date | null) => (val ? new Date(val).toLocaleDateString() : 'Never'),
       sortable: false,
-      align: 'left',
+      align: 'left'as const,
     },
     {
       name: 'actions',
       label: 'Actions',
       field: 'actions',
-      align: 'right',
+      align: 'right' as const,
       sortable: false,
     },
   ]);
@@ -291,7 +290,6 @@
 
   // Event handlers
   const handleSearch = debounce(async (searchText: string) => {
-    debugger
     try {
       if (!searchText.trim()) {
         await loadInitialData();
@@ -335,17 +333,17 @@
     }
   };
 
-  const handleInspectorSelect = (inspector: Inspector) => {
-    if (inspector && inspector.id) {
-      router.push(`/inspectors/${inspector.id}`);
-    }
-  };
+  const handleInspectorSelect = (evt: Event, row: any, index: number) => {
+      if (row && row.id) {
+        router.push(`/inspectors/${row.id}`);
+      }
+    };
 
   const handleViewEditInspector = (inspector?: Inspector) => {
   //router.push({ name: 'inspector-create', query: { inspectorId: inspector?.id } });
 };
-  const handleViewCreateInspector = (inspector?: Inspector) => {
-  router.push({ name: 'inspector-edit', query: { inspectorId: inspector?.id } });
+  const handleViewCreateInspector = (event: Event) => {
+  router.push({ name: 'inspector-edit' });
 };
 
   const handleMobilize = async (inspector: Inspector) => {
@@ -455,7 +453,6 @@
 
   // Load initial data
   const loadInitialData = async () => {
-    debugger
     try {
       await inspectorStore.searchInspectors(
         null, // location

@@ -70,10 +70,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, onUnmounted } from 'vue';
-import { useRateLimiter } from '@vueuse/core';
+import { defineComponent, ref, onMounted, onUnmounted, reactive } from 'vue';
+// import { useRateLimiter } from '@vueuse/core';
 import { useSecurityMonitor } from '@/composables/useSecurityMonitor';
-import { useValidation } from '@vuelidate/core';
+// import { useValidation } from '@vuelidate/core';
+import { useVuelidate } from '@vuelidate/core'
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import UserProfile from '@/components/auth/UserProfile.vue';
 import type { IUser } from '@/models/user.model';
@@ -99,7 +100,7 @@ export default defineComponent({
 
     // Security monitoring setup
     const { monitor, securityContext } = useSecurityMonitor();
-    const rateLimiter = useRateLimiter(PROFILE_UPDATE_LIMIT, 60000);
+    // const rateLimiter = (PROFILE_UPDATE_LIMIT, 60000);
 
     // Form validation setup
     const rules = {
@@ -108,15 +109,22 @@ export default defineComponent({
       email: { required: true, email: true },
       phoneNumber: { pattern: /^\+?[\d\s-()]+$/ }
     };
-    const v$ = useValidation(rules);
+
+    const state = reactive({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: ''
+    })
+    const v$ = useVuelidate(rules , state);
 
     // Profile update handler with rate limiting and validation
     const handleProfileUpdate = async (updatedProfile: Partial<IUser>): Promise<boolean> => {
       try {
-        if (!rateLimiter.tryAcquire()) {
-          error.value = 'Too many update attempts. Please try again later.';
-          return false;
-        }
+        // if (!rateLimiter.tryAcquire()) {
+        //   error.value = 'Too many update attempts. Please try again later.';
+        //   return false;
+        // }
 
         isLoading.value = true;
         error.value = null;

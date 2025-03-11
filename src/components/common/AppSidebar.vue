@@ -18,7 +18,7 @@
   >
     <QScrollArea
       class="fit"
-      :thumb-style="{ width: '4px', opacity: 0.75 }"
+      :thumb-style="{ width: '4px', opacity: '0.75' }"
       visible
     >
       <AppNavigation

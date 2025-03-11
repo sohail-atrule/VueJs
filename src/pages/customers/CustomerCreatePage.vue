@@ -208,7 +208,7 @@ const fetchCustomer = async () => {
   if (isEditMode.value) {
     try {
       loading.value = true;
-      const customer = await customerStore.fetchCustomerById(route.params.id);
+      const customer = await customerStore.fetchCustomerById(Number(route.params.id));
       if (customer) {
         formData.value = { ...customer };
       }
@@ -233,7 +233,7 @@ const handleSubmit = async () => {
     if (isEditMode.value) {
       const id = route.params.id;
       const updates  = formData.value;
-       await customerStore.updateCustomer(id, updates);
+       await customerStore.updateCustomer(Number(id), updates);
       $q.notify({
         type: 'positive',
         message: t('customer.edit.success'),

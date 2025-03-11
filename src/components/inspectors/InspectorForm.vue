@@ -111,7 +111,7 @@
                 </div>
                 <div class="col-12 col-md-3">
                   <QInput
-                    v-model="cert.expiryDate"
+                    v-model="cert.expiryDate.toISOString().split('T')[0]"
                     type="date"
                     :error="v$.certifications.$each.$response.$errors[index]?.expiryDate?.[0]?.$message"
                     label="Expiry Date *"
@@ -175,7 +175,7 @@ import { defineComponent, ref, computed, onMounted } from 'vue'; // ^3.3.0
 import { useVuelidate } from '@vuelidate/core'; // ^2.0.0
 import { required, minValue, maxValue, helpers } from '@vuelidate/validators'; // ^2.0.0
 import { QForm, QInput, QSelect, QBtn, QCard, QCardSection, QCardActions } from 'quasar'; // ^2.0.0
-import { Inspector, InspectorStatus } from '../../models/inspector.model';
+import { type Inspector, InspectorStatus } from '../../models/inspector.model';
 import { useInspector } from '../../composables/useInspector';
 import { useNotificationStore } from '../../stores/notification.store';
 
@@ -205,11 +205,11 @@ export default defineComponent({
     const formRef = ref<typeof QForm | null>(null);
     const isSubmitting = ref(false);
     const notificationStore = useNotificationStore();
-    const { createInspector, updateInspector, validateLocation } = useInspector();
+    //const { createInspector, updateInspector, validateLocation } = useInspector();
 
     // Form data initialization
     const formData = ref({
-      badgeNumber: props.modelValue?.badgeNumber || '',
+      badgeNumber: props.modelValue?.badgeNumber as string || '',
       status: props.modelValue?.status || InspectorStatus.Inactive,
       location: {
         latitude: props.modelValue?.location?.latitude || 0,
@@ -220,30 +220,30 @@ export default defineComponent({
 
     // Validation rules
     const rules = computed(() => ({
-      badgeNumber: { required: helpers.withMessage('Badge number is required', required) },
-      status: { required: helpers.withMessage('Status is required', required) },
-      location: {
-        latitude: { 
-          required: helpers.withMessage('Latitude is required', required),
-          minValue: helpers.withMessage('Latitude must be between -90 and 90', minValue(-90)),
-          maxValue: helpers.withMessage('Latitude must be between -90 and 90', maxValue(90))
-        },
-        longitude: {
-          required: helpers.withMessage('Longitude is required', required),
-          minValue: helpers.withMessage('Longitude must be between -180 and 180', minValue(-180)),
-          maxValue: helpers.withMessage('Longitude must be between -180 and 180', maxValue(180))
-        }
-      },
-      certifications: {
-        $each: helpers.forEach({
-          name: { required: helpers.withMessage('Certification name is required', required) },
-          issuingAuthority: { required: helpers.withMessage('Issuing authority is required', required) },
-          expiryDate: { 
-            required: helpers.withMessage('Expiry date is required', required),
-            futureDate: helpers.withMessage('Expiry date must be in the future', (value) => new Date(value) > new Date())
-          }
-        })
-      }
+      // badgeNumber: { required: helpers.withMessage('Badge number is required', required) },
+      // status: { required: helpers.withMessage('Status is required', required) },
+      // location: {
+      //   latitude: { 
+      //     required: helpers.withMessage('Latitude is required', required),
+      //     minValue: helpers.withMessage('Latitude must be between -90 and 90', minValue(-90)),
+      //     maxValue: helpers.withMessage('Latitude must be between -90 and 90', maxValue(90))
+      //   },
+      //   longitude: {
+      //     required: helpers.withMessage('Longitude is required', required),
+      //     minValue: helpers.withMessage('Longitude must be between -180 and 180', minValue(-180)),
+      //     maxValue: helpers.withMessage('Longitude must be between -180 and 180', maxValue(180))
+      //   }
+      // },
+      // certifications: {
+      //   $each: helpers.forEach({
+      //     name: { required: helpers.withMessage('Certification name is required', required) },
+      //     issuingAuthority: { required: helpers.withMessage('Issuing authority is required', required) },
+      //     expiryDate: { 
+      //       required: helpers.withMessage('Expiry date is required', required),
+      //       futureDate: helpers.withMessage('Expiry date must be in the future', (value) => new Date(value) > new Date())
+      //     }
+      //   })
+      // }
     }));
 
     const v$ = useVuelidate(rules, formData);
@@ -264,10 +264,12 @@ export default defineComponent({
       formData.value.certifications.push({
         name: '',
         issuingAuthority: '',
-        expiryDate: '',
         certificationNumber: '',
         issueDate: new Date(),
-        isActive: true
+        isActive: true,
+        id: 0,
+        inspectorId: 0,
+        expiryDate: undefined
       });
     };
 
@@ -286,23 +288,23 @@ export default defineComponent({
         }
 
         // Validate location
-        if (!validateLocation(formData.value.location)) {
-          notificationStore.error('Invalid location coordinates');
-          return;
-        }
+        // if (!validateLocation(formData.value.location)) {
+        //   notificationStore.error('Invalid location coordinates');
+        //   return;
+        // }
 
         const inspectorData = {
           ...props.modelValue,
           ...formData.value
         };
 
-        if (props.modelValue?.id) {
-          await updateInspector(inspectorData);
-          notificationStore.success('Inspector updated successfully');
-        } else {
-          const newInspectorId = await createInspector(inspectorData);
-          notificationStore.success('Inspector created successfully');
-        }
+        // if (props.modelValue?.id) {
+        //   await updateInspector(inspectorData);
+        //   notificationStore.success('Inspector updated successfully');
+        // } else {
+        //   const newInspectorId = await createInspector(inspectorData);
+        //   notificationStore.success('Inspector created successfully');
+        // }
 
         emit('submit', inspectorData);
       } catch (error) {

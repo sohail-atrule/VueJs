@@ -32,26 +32,26 @@ export class AuditService {
     action: string,
     details: Record<string, unknown>
   ): Promise<void> {
-    try {
-      const userEmail = this.getUserEmail();
-      await axios.post(
-        this.endpoint,
-        {
-          entityType,
-          entityId,
-          action,
-          details,
-        } as AuditLogPayload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-email': userEmail,
-          },
-        }
-      );
-    } catch (error) {
-      console.error('Failed to create audit log:', error);
-    }
+    // try {
+    //   const userEmail = this.getUserEmail();
+    //   await axios.post(
+    //     this.endpoint,
+    //     {
+    //       entityType,
+    //       entityId,
+    //       action,
+    //       details,
+    //     } as AuditLogPayload,
+    //     {
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         'x-user-email': userEmail,
+    //       },
+    //     }
+    //   );
+    // } catch (error) {
+    //   console.error('Failed to create audit log:', error);
+    // }
   }
 }
 

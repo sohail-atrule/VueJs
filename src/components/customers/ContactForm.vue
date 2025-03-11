@@ -131,7 +131,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-import { useQuasar } from '@quasar/vue'; // v2.x
+// import { useQuasar } from '@quasar/vue'; // v2.x
+import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n'; // v9.x
 import sanitizeHtml from 'sanitize-html'; // v2.x
 import type { IContact } from '../../models/customer.model';
@@ -191,13 +192,13 @@ export default defineComponent({
       
       switch (field) {
         case 'email':
-          if (!validateEmail(value)) {
+          if (!validateEmail(value.toString())) {
             errors.value[field] = t('validation.email');
             return false;
           }
           break;
         case 'phoneNumber':
-          if (!validatePhoneNumber(value)) {
+          if (!validatePhoneNumber(value.toString())) {
             errors.value[field] = t('validation.phoneNumber');
             return false;
           }
@@ -231,14 +232,19 @@ export default defineComponent({
         loading.value = true;
 
         // Sanitize form data before submission
-        const sanitizedData = {
+        const sanitizedData:IContact = {
+          id: props.contact?.id || 0,
           customerId: props.customerId,
           firstName: sanitizeHtml(formData.value.firstName, { allowedTags: [] }),
           lastName: sanitizeHtml(formData.value.lastName, { allowedTags: [] }),
           email: sanitizeHtml(formData.value.email, { allowedTags: [] }),
           phoneNumber: sanitizeHtml(formData.value.phoneNumber, { allowedTags: [] }),
           title: sanitizeHtml(formData.value.title, { allowedTags: [] }),
-          isPrimary: formData.value.isPrimary
+          isPrimary: formData.value.isPrimary,
+          isActive: props.contact?.isActive || true,
+          createdAt: props.contact?.createdAt || new Date(),
+          modifiedAt: new Date(),
+          preferredContactMethod: props.contact?.preferredContactMethod || 'email'
         };
 
         const response = await createContact(props.customerId, sanitizedData);

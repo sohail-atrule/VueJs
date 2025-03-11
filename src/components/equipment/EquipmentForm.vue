@@ -69,7 +69,7 @@
       <div class="col-12 col-md-6">
         <q-select
           v-model="formData.condition"
-          :options="['new', 'good', 'fair', 'poor']"
+          :options="['New', 'Used', 'Refurbished']"
           label="Condition"
           outlined
           dense

@@ -6,6 +6,7 @@
 // import { UserRoleType } from '@/models/user.model';
 import type { LoginCredentials, AuthToken, MfaChallenge } from '@/models/auth.model';
 import type { IUser } from '@/models/user.model';
+import api from '@/utils/api.util';
 import axios from 'axios';
 
 
@@ -41,19 +42,20 @@ const ROLE_ID_MAP = {
 };
 
 export async function performAzureAuth(credentials: LoginCredentials): Promise<AuthResponse> {
+
     try {
-      const response = await axios.post('http://192.168.10.154:5235/api/v1/auth/login', credentials);
-  
+      const response = await api.post('/v1/auth/login', credentials);
+
       const { id, firstName, lastName, userRoles } = response.data.user;
-  
+
       const MappedUserRoles = userRoles.map((role: keyof typeof ROLE_ID_MAP) => ({
-        id: ROLE_ID_MAP[role], 
-        userId: id, 
-        roleId: ROLE_ID_MAP[role], 
+        id: ROLE_ID_MAP[role],
+        userId: id,
+        roleId: ROLE_ID_MAP[role],
         assignedAt: new Date(),
         revokedAt: null,
       }));
-  
+
       return {
         tokens: response.data.tokens,
         user: {
@@ -104,7 +106,8 @@ export async function completeMfaChallenge(verificationCode: string): Promise<Au
                 userId: 123,
                 roleId: ROLE_ID_MAP[UserRoleType.CustomerService],
                 assignedAt: new Date(),
-                revokedAt: null
+                revokedAt: null,
+                name: ""
             }],
             createdAt: new Date(),
             modifiedAt: null,
@@ -144,7 +147,8 @@ export async function performTokenRefresh(refreshToken: string): Promise<AuthRes
                 userId: 123,
                 roleId: ROLE_ID_MAP[UserRoleType.CustomerService],
                 assignedAt: new Date(),
-                revokedAt: null
+                revokedAt: null,
+                name: ""
             }],
             createdAt: new Date(),
             modifiedAt: null,

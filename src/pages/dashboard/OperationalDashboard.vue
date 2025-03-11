@@ -203,7 +203,7 @@ export default defineComponent({
     const assignedEquipmentCount = computed(() => assignedEquipment.value.length);
     const maintenanceRequiredCount = computed(() => maintenanceRequired.value.length);
     const availableInspectorsCount = computed(() => 
-      inspectorStore.inspectorsByStatus('AVAILABLE').length
+      inspectorStore.inspectorsByStatus['Available'].length
     );
 
     // Recent activity tracking
@@ -299,7 +299,7 @@ export default defineComponent({
     onMounted(async () => {
       try {
         await Promise.all([
-          inspectorStore.searchInspectors(null, null, ['AVAILABLE'], [], false),
+          inspectorStore.searchInspectors(null, null, inspectorStore.inspectorsByStatus['Available'], [], false),
           // Add other initialization calls here
         ]);
       } catch (error) {

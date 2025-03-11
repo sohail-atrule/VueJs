@@ -123,7 +123,7 @@
   const { currentUser } = useAuth();
 
   const userName = computed(() => currentUser.value?.firstName || 'User');
-  const lastLogin = ref(currentUser.value?.lastLoginDate || new Date());
+  const lastLogin = ref(currentUser.value?.lastLoginAt || new Date());
   const equipmentCount = ref(2);
   const availableEquipment = ref('1 Available');
   const inspectorsCount = ref(2);

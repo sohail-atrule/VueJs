@@ -7,7 +7,7 @@
       :loading="loading"
       :row-key="rowKey"
       :virtual-scroll="virtualScroll"
-      @row-click="$emit('row-click', $event)"
+      @row-click="$emit('row-click', $event,$data[rowKey])"
     >
       <template v-for="(_, slot) in $slots" v-slot:[slot]="scope">
         <slot :name="slot" v-bind="scope"/>

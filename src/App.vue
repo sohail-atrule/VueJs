@@ -121,7 +121,7 @@
         const mainContent = document.querySelector('#main-content');
         if (mainContent) {
           mainContent.setAttribute('tabindex', '-1');
-          mainContent.focus();
+          (mainContent as HTMLElement).focus();
         }
       };
 

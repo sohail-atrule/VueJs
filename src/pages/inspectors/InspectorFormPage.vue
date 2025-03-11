@@ -41,7 +41,7 @@
               label="Cancel"
               color="grey"
               flat
-              :to="{ name: 'inspector-list' }" 
+              :to="{ name: 'inspector-list' }"
             />
             <!-- SAVE -->
             <QBtn
@@ -65,6 +65,7 @@ import axios from 'axios';
 // If you'd like to use your Pinia store:
 import { useInspectorStore } from '@/stores/inspector.store';
 import router from '@/router';
+import api from '@/utils/api.util';
 // or import { createInspector } from '@/api/inspector.api';
 const inspectorStore = useInspectorStore();
 
@@ -93,7 +94,7 @@ const formData = ref({
 /**
  * Handle Form Submission
  * Builds the JSON exactly as your cURL & .NET controller expects
- * and posts to 'https://192.168.10.154:7031/api/v1/Inspectors'.
+ * and posts to 'https://192.168.1.28:7031/api/v1/Inspectors'.
  */
 async function handleSubmit() {
   try {
@@ -115,9 +116,9 @@ async function handleSubmit() {
 
     // Perform the POST request directly via axios
     // (You could also call your createInspector(...) API method if you adapt it)
-    debugger
-    await axios.post(
-      'https://192.168.10.154:7031/api/v1/Inspectors',
+
+    await api.post(
+      '/v1/Inspectors',
       payload,
       { headers: { 'Content-Type': 'application/json' } }
     );

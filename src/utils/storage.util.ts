@@ -5,7 +5,8 @@
  */
 
 import CryptoJS from 'crypto-js'; // ^4.1.1
-import { AuthToken, UserSession } from '../models/auth.model';
+import type { UserSession } from '../models/auth.model';
+import { type AuthToken } from '../models/auth.model';
 
 /**
  * Storage operation options interface
@@ -62,11 +63,11 @@ export class StorageService {
     this.encryptionKey = import.meta.env.VUE_APP_STORAGE_ENCRYPTION_KEY as string;
     this.storage = window.localStorage;
     this.registry = new Map();
-    
+
     if (!this.encryptionKey) {
       throw new Error('Storage encryption key not configured');
     }
-    
+
     this.initializeStorage();
     this.startMaintenanceInterval();
   }
@@ -153,7 +154,7 @@ export class StorageService {
       const iv = this.generateIV();
       const salt = this.generateSalt();
       const encrypted = this.encrypt(token, iv, salt);
-      
+
       const metadata: StorageMetadata = {
         version: STORAGE_CONFIG.VERSION,
         iv,
@@ -165,7 +166,7 @@ export class StorageService {
 
       this.storage.setItem(STORAGE_KEYS.AUTH_TOKEN, encrypted);
       this.registry.set(STORAGE_KEYS.AUTH_TOKEN, metadata);
-      
+
       // Set token expiration
       if (token.expiresIn) {
         setTimeout(() => {
@@ -215,7 +216,7 @@ export class StorageService {
       const iv = this.generateIV();
       const salt = this.generateSalt();
       const encrypted = this.encrypt(session, iv, salt);
-      
+
       const metadata: StorageMetadata = {
         version: STORAGE_CONFIG.VERSION,
         iv,

@@ -115,7 +115,7 @@ const initialFilters = ref({
 // Event handlers
 const handleSearch = debounce(async (searchText: string) => {
   try {
-    await customerStore.updateFilters({ search: searchText });
+    //await customerStore.updateFilters({ search: searchText });
     updateRouteQuery({ search: searchText });
   } catch (error) {
     handleError('Search failed', error);
@@ -124,7 +124,7 @@ const handleSearch = debounce(async (searchText: string) => {
 
 const handleFilterChange = async (filters: Record<string, any>) => {
   try {
-    await customerStore.updateFilters(filters);
+    //await customerStore.updateFilters(filters);
     updateRouteQuery(filters);
   } catch (error) {
     handleError('Filter update failed', error);
@@ -133,11 +133,11 @@ const handleFilterChange = async (filters: Record<string, any>) => {
 
 const handleFilterReset = async () => {
   try {
-    await customerStore.updateFilters({
-      search: '',
-      region: '',
-      status: null
-    });
+    // await customerStore.updateFilters({
+    //   search: '',
+    //   region: '',
+    //   status: null
+    // });
     router.replace({ query: {} });
   } catch (error) {
     handleError('Filter reset failed', error);
@@ -174,12 +174,12 @@ const handleCreateCustomer = () => {
 
 const handleExport = async () => {
   try {
-    await customerStore.exportCustomers();
-    $q.notify({
-      type: 'positive',
-      message: 'Customer list exported successfully',
-      position: 'top'
-    });
+    //await customerStore.exportCustomers();
+    // $q.notify({
+    //   type: 'positive',
+    //   message: 'Customer list exported successfully',
+    //   position: 'top'
+    // });
   } catch (error) {
     handleError('Export failed', error);
   }
@@ -208,7 +208,14 @@ const updateRouteQuery = (query: Record<string, any>) => {
 // Lifecycle hooks
 onMounted(async () => {
   try {
-    await customerStore.fetchCustomers();
+    await customerStore.fetchCustomers({
+      region: '',
+      status: null,
+      search: '',
+      industry: '', // Add appropriate value if needed
+      page: 1, // Add appropriate value if needed
+      pageSize: 10 // Add appropriate value if needed
+    });
   } catch (error) {
     // handleError('Failed to load customers', error);
     console.log(error)

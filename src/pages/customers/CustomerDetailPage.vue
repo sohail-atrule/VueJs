@@ -13,7 +13,7 @@
           </q-badge>
         </div>
         <div class="text-caption">
-          Last modified: {{ formatDate(selectedCustomer?.modifiedAt) }}
+          Last modified: {{ formatDate(selectedCustomer?.modifiedAt.toString()) }}
         </div>
       </div>
       <div class="col-12 col-md-4 text-right">
@@ -224,7 +224,7 @@ export default defineComponent({
     const router = useRouter();
     const $q = useQuasar();
     const { selectedCustomer, fetchCustomerById, fetchCustomerContacts, fetchCustomerContracts } = useCustomer();
-    const { logAccess, logAction } = useAuditLog();
+    const { logAction } = useAuditLog();
     const { validateAccess, hasPermission } = useSecurityValidation();
 
     // Reactive state
@@ -239,7 +239,7 @@ export default defineComponent({
       { name: 'endDate', label: 'End Date', field: 'endDate', format: formatDate, sortable: true },
       { name: 'value', label: 'Value', field: 'value', format: (val: number) => `$${val.toLocaleString()}`, sortable: true },
       { name: 'status', label: 'Status', field: 'status', sortable: true },
-      { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
+      { name: 'actions', label: 'Actions', field: 'actions', align: 'right'  as const }
     ];
 
     const contactColumns = [
@@ -248,20 +248,21 @@ export default defineComponent({
       { name: 'title', label: 'Title', field: 'title', sortable: true },
       { name: 'email', label: 'Email', field: 'email', sortable: true },
       { name: 'phoneNumber', label: 'Phone', field: 'phoneNumber', sortable: true },
-      { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
+      { name: 'actions', label: 'Actions', field: 'actions', align: 'right'   as const}
     ];
 
     // Methods
     const loadCustomerData = async () => {
       try {
         loading.value = true;
-        await validateAccess('customer:view', customerId.value);
+        // await validateAccess('customer:view', customerId.value);
+        await validateAccess(['customer:view'], 'customer', customerId.value.toString());
         await fetchCustomerById(customerId.value);
         await Promise.all([
           fetchCustomerContacts(customerId.value),
           fetchCustomerContracts(customerId.value)
         ]);
-        logAccess('customer:view', customerId.value);
+        // logAccess('customer:view', customerId.value);
       } catch (error) {
         $q.notify({
           type: 'negative',
@@ -275,9 +276,10 @@ export default defineComponent({
 
     const handleTabChange = async (tab: string) => {
       try {
-        await validateAccess(`customer:${tab}`, customerId.value);
+        // await validateAccess(`customer:${tab}`, customerId.value);
+        await validateAccess(['customer:view'], 'customer', customerId.value.toString());
         activeTab.value = tab;
-        logAccess(`customer:${tab}`, customerId.value);
+        // logAccess(`customer:${tab}`, customerId.value);
       } catch (error) {
         $q.notify({
           type: 'negative',
@@ -324,15 +326,15 @@ export default defineComponent({
       hasPermission,
 
       // Event handlers
-      handleEdit: () => logAction('customer:edit', customerId.value),
-      handleExport: () => logAction('customer:export', customerId.value),
-      handleNewContract: () => logAction('contract:create', customerId.value),
-      handleNewContact: () => logAction('contact:create', customerId.value),
-      handleViewContract: (contract: IContract) => logAction('contract:view', contract.id),
-      handleEditContract: (contract: IContract) => logAction('contract:edit', contract.id),
-      handleEditContact: (contact: IContact) => logAction('contact:edit', contact.id),
-      handleCallContact: (contact: IContact) => logAction('contact:call', contact.id),
-      handleEmailContact: (contact: IContact) => logAction('contact:email', contact.id),
+      handleEdit: () => logAction('customer:edit', customerId.value,"Edit Customer",{}),
+      handleExport: () => logAction('customer:export', customerId.value,"Export Customer",{}),
+      handleNewContract: () => logAction('contract:create', customerId.value,"Create Contract",{}),
+      handleNewContact: () => logAction('contact:create', customerId.value,"Create Contact",{}),
+      handleViewContract: (contract: IContract) => logAction('contract:view', contract.id,"View Contract",{}),
+      handleEditContract: (contract: IContract) => logAction('contract:edit', contract.id,"Edit Contract",{}),
+      handleEditContact: (contact: IContact) => logAction('contact:edit', contact.id,"Edit Contact",{}),
+      handleCallContact: (contact: IContact) => logAction('contact:call', contact.id,"Call Contact",{}),
+      handleEmailContact: (contact: IContact) => logAction('contact:email', contact.id,"Email Contact",{}),
       handleEquipmentUpdate: () => loadCustomerData()
     };
   }

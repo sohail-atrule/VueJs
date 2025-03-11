@@ -13,7 +13,6 @@ import qs from 'qs';
 // API endpoint constants
 const API_VERSION = 'v1';
 const API_BASE_PATH = `/${API_VERSION}/inspectors`;
-const Base_Url = 'https://192.168.10.154:7031/api/v1';
 
 /**
  * Interface for paginated response data
@@ -91,7 +90,7 @@ export async function searchInspectors(params: SearchInspectorsParams): Promise<
         if (params.location) {
             validateLocation(params.location);
         }
-        
+
         // Flatten the location object and include all parameters defined in the interface
         const searchParams = {
             ...(params.location && {
@@ -109,7 +108,7 @@ export async function searchInspectors(params: SearchInspectorsParams): Promise<
 
         console.log("searchParams:", searchParams);
 
-        const response = await axios.get(`${Base_Url}/Inspectors/search`, {
+        const response = await api.get(`${API_VERSION}/Inspectors/search`, {
             params: searchParams,
             // This will ensure arrays are sent as repeated parameters.
             paramsSerializer: params => qs.stringify(params, { arrayFormat: 'repeat' })
@@ -141,11 +140,11 @@ export async function getInspectorById(id: string): Promise<Inspector> {
 export async function createInspector(request: CreateInspectorRequest): Promise<Inspector> {
     try {
         validateLocation(request.location);
-        
+
         if (!request.userId || request.userId <= 0) {
             throw new Error('Invalid user ID');
         }
-        
+
         if (!request.badgeNumber?.trim()) {
             throw new Error('Badge number is required');
         }
@@ -190,11 +189,10 @@ export async function updateInspector(id: string, data: UpdateInspectorRequest):
  */
 export async function mobilizeInspector(id: number): Promise<void> {
     try {
-      await axios.post(
-        `${Base_Url}/Inspectors/${id}/mobilize`);
+      await api.post(`${API_VERSION}/Inspectors/${id}/mobilize`);
     } catch (error) {
       console.error(`Failed to mobilize inspector ${id}:`, error);
-      throw error; 
+      throw error;
     }
   }
 
@@ -203,7 +201,7 @@ export async function mobilizeInspector(id: number): Promise<void> {
  */
 export async function addDrugTest(inspectorId: string, data: Omit<DrugTest, 'id' | 'inspectorId'>): Promise<DrugTest> {
     try {
-        const response = await axios.post(`${Base_Url}/Inspectors/${inspectorId}/drug-tests`, data);
+        const response = await api.post(`${API_VERSION}/Inspectors/${inspectorId}/drug-tests`, data);
         return response.data;
     } catch (error) {
         console.error(`Failed to add drug test for inspector ${inspectorId}:`, error);

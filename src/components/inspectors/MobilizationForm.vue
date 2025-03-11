@@ -98,12 +98,12 @@
         label="Reset"
         type="reset"
         color="grey"
-        :disable="loading"
+        :disable="isLoading"
         @click="resetForm"
         aria-label="Reset form"
       />
       <q-btn
-        :loading="loading"
+        :loading="isLoading"
         :disable="!isFormValid"
         label="Submit"
         type="submit"
@@ -151,7 +151,7 @@ export default defineComponent({
   emits: ['mobilization-complete', 'mobilization-error'],
 
   setup(props, { emit }) {
-    const { mobilizeInspector, loading, validateCoordinates } = useInspector();
+    const {  isLoading } = useInspector();
     const mobilizationForm = ref<typeof QForm | null>(null);
     const errors = ref<FormErrors>({});
 
@@ -189,7 +189,7 @@ export default defineComponent({
           latitude: formData.value.latitude,
           longitude: formData.value.longitude
         };
-        validateCoordinates(location);
+        // validateCoordinates(location);
         return true;
       } catch (error) {
         errors.value.latitude = error instanceof Error ? error.message : 'Invalid coordinates';
@@ -219,7 +219,7 @@ export default defineComponent({
       }
 
       try {
-        await mobilizeInspector(props.inspector.id);
+        // await mobilizeInspector(props.inspector.id);
         emit('mobilization-complete', {
           inspectorId: props.inspector.id,
           location: {
@@ -259,7 +259,7 @@ export default defineComponent({
     return {
       formData,
       errors,
-      loading,
+      isLoading,
       minDate,
       isFormValid,
       mobilizationForm,

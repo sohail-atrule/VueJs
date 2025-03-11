@@ -10,10 +10,10 @@ import api from '../utils/api.util';
 import retry from 'axios-retry';
 import rateLimit from 'axios-rate-limit';
 import createError from 'http-errors';
+import { eq } from 'lodash';
 
 // API endpoint constants
-const API_VERSION = import.meta.env.VITE_APP_API_VERSION || 'v1';
-const BASE_URL = import.meta.env.VITE_APP_API_URL || 'https://192.168.10.154:7031/api';
+const API_VERSION ='v1';
 const API_ENDPOINTS = {
     EQUIPMENT: `/${API_VERSION}/equipment`,
     ASSIGNMENTS: `/${API_VERSION}/equipment/assignments`,
@@ -39,6 +39,7 @@ const logger = {
         console.log(`[INFO] ${message}`, ...args);
     },
     error: (message: string, ...args: any[]) => {
+
         console.error(`[ERROR] ${message}`, ...args);
     },
     warn: (message: string, ...args: any[]) => {
@@ -48,7 +49,6 @@ const logger = {
 
 // Helper function to convert IEquipment to Equipment
 function convertToEquipment(item: any): Equipment {
-    debugger
     return new Equipment({
         id: Number(item.id),
         serialNumber: item.serialNumber,
@@ -101,7 +101,8 @@ function convertToIEquipment(item: Equipment): any {
         maintenanceHistory: item.maintenanceHistory,
         documents: item.documents,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        createdBy: "Admin", // Hardcoded for now
     };
 }
 
@@ -162,10 +163,12 @@ export class EquipmentApiClient {
      */
     async createEquipment(equipment: Partial<Equipment>): Promise<Equipment> {
         try {
+
             logger.info('Creating new equipment', { equipment });
             // Create a proper Equipment instance first
             const equipmentInstance = new Equipment(equipment);
             const iequipment = convertToIEquipment(equipmentInstance);
+            iequipment.createdBy = "Admin";
             const response = await api.post(API_ENDPOINTS.EQUIPMENT, iequipment);
             return convertToEquipment(response.data);
         } catch (error) {
@@ -260,21 +263,17 @@ export default equipmentApi;
 
 // Standalone functions using the same logger and error handling
 export async function getEquipmentList(filters: Record<string, any>): Promise<Equipment[]> {
-    debugger
     try {
         logger.info('Fetching equipment list');
         // Debug log to see the full URL
         // const fullUrl = `${api.defaults.baseURL}${API_ENDPOINTS.EQUIPMENT}`;
         // logger.info('Full URL:', fullUrl);
-        
+
         // const response = await api.get(API_ENDPOINTS.EQUIPMENT);
         // return response.data.map(convertToEquipment);
-     
-        
-        const fullUrl = `${BASE_URL}${API_ENDPOINTS.EQUIPMENT}`;
-        logger.info('Full URL:', fullUrl);
+
         const params = {
-            page: filters.page || 1, 
+            page: filters.page || 1,
             pageSize: filters.pageSize || 10,
             startDate: filters.startDate || null,
             endDate: filters.endDate || null,
@@ -287,7 +286,7 @@ export async function getEquipmentList(filters: Record<string, any>): Promise<Eq
 
         logger.info('Final API Query Params:', params);
 
-        const response = await api.get(fullUrl, {
+        const response = await api.get(API_ENDPOINTS.EQUIPMENT, {
             params: params, // Pass the parameters as query parameters
             headers: {
                 'Content-Type': 'application/json' // This is usually not necessary for GET requests
@@ -311,14 +310,16 @@ export async function getEquipmentById(id: number): Promise<Equipment> {
     }
 }
 
-export async function createEquipment(equipment: Partial<Equipment>): Promise<Equipment> {
+export async function createEquipment(equipment: Partial<any>): Promise<Equipment> {
     try {
-        logger.info('Creating new equipment', { equipment });
-        // Create a proper Equipment instance first
-        const equipmentInstance = new Equipment(equipment);
-        const iequipment = convertToIEquipment(equipmentInstance);
-        const response = await api.post(API_ENDPOINTS.EQUIPMENT, iequipment);
-        return convertToEquipment(response.data);
+
+        equipment.createdBy = "Admin";
+        // logger.info('Creating new equipment', { equipment });
+        // // Create a proper Equipment instance first
+        // const equipmentInstance = new Equipment(equipment);
+        // const iequipment = convertToIEquipment(equipmentInstance);
+        const response = await api.post(API_ENDPOINTS.EQUIPMENT, equipment);
+        return response.data;
     } catch (error) {
         logger.error('Failed to create equipment', { error, equipment });
         throw createError(400, 'Failed to create equipment', { cause: error });
@@ -337,20 +338,22 @@ export async function updateEquipment(id: number, updates: Partial<Equipment>): 
     }
 }
 
-export async function assignEquipment(equipmentId: number, inspectorId: number): Promise<void> {
+export async function assignEquipment(equipment: any): Promise<void> {
     try {
-        logger.info('Assigning equipment', { equipmentId, inspectorId });
-        await api.post(`${API_ENDPOINTS.ASSIGNMENTS}`, { equipmentId, inspectorId });
+
+        logger.info('Assigning equipment', { equipment });
+        // await api.post(`equipment/`+ route.params.id +``, { equipmentId, inspectorId });
+        await api.put(`/v1/equipment/`+ equipment.equipmentId +`/assign`, equipment);
     } catch (error) {
-        logger.error('Failed to assign equipment', { error, equipmentId, inspectorId });
+        // logger.error('Failed to assign equipment', { error, equipment, inspectorId });
         throw createError(400, 'Failed to assign equipment', { cause: error });
     }
 }
 
-export async function returnEquipment(equipmentId: number): Promise<void> {
+export async function returnEquipment(equipmentId: number, returnDetails: any): Promise<void> {
     try {
         logger.info('Processing equipment return', { equipmentId });
-        await api.put(`${API_ENDPOINTS.ASSIGNMENTS}/${equipmentId}/return`);
+        await api.put(`/v1/equipment/${equipmentId}/return`, returnDetails);
     } catch (error) {
         logger.error('Failed to return equipment', { error, equipmentId });
         throw createError(400, 'Failed to return equipment', { cause: error });

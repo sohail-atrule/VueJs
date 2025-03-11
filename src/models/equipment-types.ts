@@ -130,7 +130,7 @@ export interface IEquipment {
     type: string;
     serialNumber: string;
     status: 'available' | 'assigned' | 'maintenance' | 'retired';
-    condition: 'new' | 'good' | 'fair' | 'poor';
+    condition: 'new' | 'used' | 'refurbished';
     purchaseDate: Date;
     lastMaintenanceDate: Date | null;
     assignedTo: string | null;
@@ -138,6 +138,8 @@ export interface IEquipment {
     notes: string;
     createdAt: Date;
     updatedAt: Date;
+    createdBy: string;
+    updatedBy: string;
 }
 
 /**

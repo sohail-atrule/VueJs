@@ -92,7 +92,7 @@ export default defineComponent({
 
     // Configure global Quasar notification defaults
     const configureQuasarNotifications = () => {
-      $q.notify.setDefaults({
+      Notify.setDefaults({
         position: getResponsivePosition(),
         timeout: 5000,
         progress: true,

@@ -2,11 +2,8 @@
 export {
     Equipment,
     EquipmentType,
-    EquipmentStatus,
-    type EquipmentTypeKey,
-    type EquipmentTypeValue,
-    type EquipmentStatusKey,
-    type EquipmentStatusValue
+    EquipmentStatus
+    
 } from './equipment.model';
 
 // Export interfaces from equipment-types.ts
@@ -15,5 +12,9 @@ export type {
     EquipmentSpecifications,
     MaintenanceRecord,
     EquipmentDocument,
-    EquipmentHistory
+    EquipmentHistory,
+    EquipmentTypeKey,
+    EquipmentTypeValue,
+    EquipmentStatusKey,
+    EquipmentStatusValue
 } from './equipment-types'; 
