@@ -42,19 +42,10 @@ export const useUserStore = defineStore('user', () => {
   // Store instance for notifications
   const notificationStore = useNotificationStore();
 
-  // Computed properties
-  // const isCacheValid = computed(() => {
-  //   if (!lastSync.value) return false;
-  //   return new Date().getTime() - lastSync.value.getTime() < CACHE_DURATION;
-  // });
-
   const activeUsers = computed(() => users.value.filter((user) => user.isActive));
 
   // Actions
   const fetchUsers = async (params: Partial<SearchParams> = {}, forceRefresh = false) => {
-    // if (!forceRefresh && isCacheValid.value) {
-    //   return { users: users.value, total: total.value };
-    // }
 
     loading.value = true;
     error.value = null;

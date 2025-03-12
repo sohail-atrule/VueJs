@@ -125,9 +125,9 @@ export const useCustomerStore = defineStore('customer', {
       }
     ): Promise<any> {
       try {
-        this.loading = true; 
-        this.error = null; 
-    
+        this.loading = true;
+        this.error = null;
+
         // Fetch the list of customers from the API
         const response = await customerApi.getCustomers(
           {
@@ -139,10 +139,10 @@ export const useCustomerStore = defineStore('customer', {
             pageSize,
           }
         );
-    
+
         // Clear existing customers
         this.customers.clear();
-    
+
         // Check if the response is an array
         if (Array.isArray(response.customers)) {
           // Update store with Map-based storage
@@ -199,7 +199,7 @@ export const useCustomerStore = defineStore('customer', {
 
         const createdCustomer = await customerApi.createCustomer(customer);
         this.customers.set(createdCustomer.id, createdCustomer);
-        
+
         useNotificationStore().success('Customer created successfully');
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Failed to create customer';
@@ -224,18 +224,9 @@ export const useCustomerStore = defineStore('customer', {
         this.loading = true;
         this.error = null;
 
-        // Optimistic update
-        // this.customers.set(id, { ...previousData, ...updates });
-
          await customerApi.updateCustomer(id, updates);
-        //  this.customers.set(id, updatedCustomer);
-        
         useNotificationStore().success('Customer updated successfully');
       } catch (error) {
-        // Rollback on error
-        // if (previousData) {
-        //   this.customers.set(id, previousData);
-        // }
         this.error = error instanceof Error ? error.message : 'Failed to update customer';
         useNotificationStore().error(this.error);
         throw error;
@@ -301,7 +292,7 @@ export const useCustomerStore = defineStore('customer', {
         region: this.filters.region,
         status: this.filters.status,
         search: this.filters.search,
-        industry: this.filters.search, 
+        industry: this.filters.search,
         page: this.pagination.page,
         pageSize: this.pagination.limit,
       });

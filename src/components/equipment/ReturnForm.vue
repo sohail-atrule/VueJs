@@ -130,15 +130,13 @@ export default defineComponent({
     const conditionOptions = [
       { label: t('equipment.condition.new'), value: 'New' },
       { label: t('equipment.condition.Used'), value: 'Used' },
-      { label: t('equipment.condition.Refurbished'), value: 'Refurbished' },
-      // { label: t('equipment.condition.poor'), value: 'Poor' },
-      // { label: t('equipment.condition.damaged'), value: 'Damaged' }
+      { label: t('equipment.condition.Refurbished'), value: 'Refurbished' }
     ];
 
     // Computed properties
     const isValid = computed(() => {
-      return !!returnCondition.value && 
-             !!notes.value && 
+      return !!returnCondition.value &&
+             !!notes.value &&
              notes.value.length >= 10;
     });
 
@@ -206,21 +204,21 @@ export default defineComponent({
     return {
       // Template refs
       returnForm,
-      
+
       // State
       returnCondition,
       notes,
       errors,
       loading,
-      
+
       // Computed
       isValid,
       conditionOptions,
-      
+
       // Methods
       submitReturn,
       cancelReturn,
-      
+
       // i18n
       t
     };

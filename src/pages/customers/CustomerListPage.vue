@@ -1,5 +1,5 @@
 <template>
-  <q-page 
+  <q-page
     class="customer-list-page"
     role="main"
     aria-label="Customer List Page"
@@ -11,7 +11,7 @@
       </h1>
       <div class="customer-list-page__actions">
         <q-btn
-          v-if="hasCreatePermission && !isEditMode" 
+          v-if="hasCreatePermission && !isEditMode"
           color="primary"
           icon="add"
           label="New Customer"
@@ -133,6 +133,7 @@ const handleFilterChange = async (filters: Record<string, any>) => {
 
 const handleFilterReset = async () => {
   try {
+    //to be implemented later
     // await customerStore.updateFilters({
     //   search: '',
     //   region: '',
@@ -174,6 +175,7 @@ const handleCreateCustomer = () => {
 
 const handleExport = async () => {
   try {
+    //to be implemented later
     //await customerStore.exportCustomers();
     // $q.notify({
     //   type: 'positive',
@@ -226,22 +228,6 @@ onUnmounted(() => {
   handleSearch.cancel();
 });
 
-// Watch route changes
-// watch(
-//   () => route.query,
-//   async (newQuery) => {
-//     try {
-//       await customerStore.updateFilters({
-//         search: newQuery.search || '',
-//         region: newQuery.region || '',
-//         status: newQuery.status || null
-//       });
-//     } catch (error) {
-//       handleError('Failed to update filters from URL', error);
-//     }
-//   },
-//   { immediate: true }
-// );
 </script>
 
 <style lang="scss" scoped>
@@ -286,7 +272,7 @@ onUnmounted(() => {
     .q-btn {
       background: white;
       color: var(--q-primary);
-      
+
       &:hover {
         background: rgba(255, 255, 255, 0.9);
       }
@@ -294,7 +280,7 @@ onUnmounted(() => {
 
     @media (max-width: $breakpoint-xs) {
       width: 100%;
-      
+
       .q-btn {
         flex: 1;
       }
@@ -310,7 +296,7 @@ onUnmounted(() => {
   // High contrast mode support
   @media (forced-colors: active) {
     border: 1px solid ButtonText;
-    
+
     .q-btn {
       border: 1px solid ButtonText;
     }

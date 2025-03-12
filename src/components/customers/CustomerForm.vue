@@ -295,14 +295,6 @@ export default defineComponent({
     // Initialize form with existing data
     const initializeForm = () => {
       if (props.modelValue) {
-        // Validate security classification before populating
-        // if (!validateSecurityLevel(props.modelValue.securityLevel)) {
-        //   emit('securityViolation', {
-        //     type: 'invalid_security_level',
-        //     message: 'Invalid security level detected'
-        //   });
-        //   return;
-        // }
 
         // Sanitize and populate form data
         Object.keys(formData.value).forEach(key => {
@@ -320,12 +312,6 @@ export default defineComponent({
       const isValid = await formRef.value.validate();
       if (!isValid) return false;
 
-      // Additional security validation
-      // if (!validateSecurityLevel(formData.value.securityLevel)) {
-      //   setError('securityLevel', t('validation.invalidSecurityLevel'));
-      //   return false;
-      // }
-
       return true;
     };
 
@@ -333,12 +319,12 @@ export default defineComponent({
     const handleSubmit = async () => {
       try {
         loading.value = true;
-        
+
         const isValid = await validateForm();
         if (!isValid) return;
 
         const customerData = { ...formData.value };
-        
+
         if (props.modelValue?.id) {
           await updateCustomer(props.modelValue.id, customerData);
         } else {
@@ -390,7 +376,7 @@ export default defineComponent({
       formData,
       hasErrors,
       industryOptions,
-      regionOptions, 
+      regionOptions,
       complianceOptions,
       validateRequired,
       validateField,

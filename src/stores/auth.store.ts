@@ -154,13 +154,6 @@ export const useAuthStore = defineStore('auth', {
                 // Perform authentication
                 const response = await performAzureAuth(credentials);
 
-
-                // if (response.requiresMfa && response.mfaChallenge) {
-                //     this.authStatus = AuthStatus.MFA_REQUIRED;
-                //     this.mfaChallenge = response.mfaChallenge;
-                //     return;
-                // }
-
                 await this.handleAuthSuccess(response);
 
             } catch (error) {

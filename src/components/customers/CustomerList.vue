@@ -4,7 +4,7 @@
     <QCard class="filter-section q-mb-md">
   <QCardSection>
     <div class="row q-col-gutter-md items-center">
-      
+
       <!-- Search Bar -->
       <div class="col-12 col-md-4">
         <SearchBar
@@ -172,14 +172,14 @@
   });
 
   const pagination = ref({
-    sortBy: 'FirstName', 
+    sortBy: 'FirstName',
     descending: false,
     page: 1,
     rowsPerPage: 10,
     rowsNumber: 0,
   });
   const onTableRequest = async (props: any) => {
-    
+
     const { page, rowsPerPage, sortBy, descending } = props.pagination;
 
     // Update pagination state reactively
@@ -304,20 +304,6 @@
   };
 
   const handleRowClick = async (evt: Event, row: ICustomer) => {
-    // if (!validateRequired(row.id)) return;
-
-    // try {
-    //   await router.push({
-    //     name: 'customer-details',
-    //     params: { id: row.id.toString() },
-    //   });
-    // } catch (error) {
-    //   $q.notify({
-    //     type: 'negative',
-    //     message: t('customer.errors.navigation_failed'),
-    //     position: 'top',
-    //   });
-    // }
   };
 
 

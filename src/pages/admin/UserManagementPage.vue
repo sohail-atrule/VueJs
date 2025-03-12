@@ -27,7 +27,6 @@
             <q-select
               v-model="filters.status"
               :options="[
-                // { label: 'All Users', value: null },
                 { label: 'Active', value: true },
                 { label: 'Inactive', value: false },
               ]"
@@ -108,7 +107,7 @@
                   option-value="id"
                   option-label="name"
                   emit-value
-                  map-options 
+                  map-options
                   label="Roles"
                   multiple
                   :rules="[(val) => val.length > 0 || 'At least one role is required']"
@@ -172,7 +171,7 @@
   ];
 
   const pagination = ref({
-    sortBy: 'FirstName', 
+    sortBy: 'FirstName',
     descending: false,
     page: 1,
     rowsPerPage: 10,
@@ -216,7 +215,7 @@
         sortBy: pagination.value.sortBy,
         sortOrder: pagination.value.descending ? 'desc' as const: 'asc' as const,
       };
-    
+
       var store = await userStore.fetchUsers(searchParams);
       pagination.value.rowsNumber = store.total;
     } catch (error) {

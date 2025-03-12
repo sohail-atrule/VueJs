@@ -43,25 +43,6 @@ interface InspectorState {
     error: string | null;
 }
 
-// Generate cache key from search parameters
-// const generateCacheKey = (params: SearchParameters): string => {
-//     return JSON.stringify({
-//         lat: params.location.latitude,
-//         lng: params.location.longitude,
-//         radius: params.radiusInMiles,
-//         status: params.status,
-//         certs: params.certifications.sort(),
-//         active: params.isActive,
-//         page: params.pageNumber,
-//         size: params.pageSize
-//     });
-// };
-
-// // Check if cached result is still valid
-// const isCacheValid = (timestamp: number): boolean => {
-//     return Date.now() - timestamp < CACHE_DURATION_MS;
-// };
-
 // Create and export the inspector store
 export const useInspectorStore = defineStore('inspector', {
     state: (): InspectorState => ({

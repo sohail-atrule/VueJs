@@ -12,7 +12,7 @@
       />
       <h1 class="text-h5 q-my-none">Add New Equipment</h1>
     </div>
- 
+
     <!-- Equipment Form -->
     <EquipmentForm
       :loading="loading"
@@ -65,11 +65,11 @@ export default defineComponent({
         error.value = null;
 
         await equipmentStore.createNewEquipment(equipmentData);
+        showSuccessNotification('Equipment created successfully');
         await router.push({ name: 'equipment-list' });
       } catch (err) {
-        console.error(err);
-        // error.value = err instanceof Error ? err.message : 'Failed to create equipment';
-        // showErrorNotification(error.value);
+        error.value = err instanceof Error ? err.message : 'Failed to create equipment';
+        showErrorNotification(error.value);
       } finally {
         loading.value = false;
       }
@@ -99,4 +99,4 @@ export default defineComponent({
     padding: 1rem;
   }
 }
-</style> 
+</style>

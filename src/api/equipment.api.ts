@@ -264,13 +264,6 @@ export default equipmentApi;
 // Standalone functions using the same logger and error handling
 export async function getEquipmentList(filters: Record<string, any>): Promise<Equipment[]> {
     try {
-        logger.info('Fetching equipment list');
-        // Debug log to see the full URL
-        // const fullUrl = `${api.defaults.baseURL}${API_ENDPOINTS.EQUIPMENT}`;
-        // logger.info('Full URL:', fullUrl);
-
-        // const response = await api.get(API_ENDPOINTS.EQUIPMENT);
-        // return response.data.map(convertToEquipment);
 
         const params = {
             page: filters.page || 1,
@@ -280,9 +273,6 @@ export async function getEquipmentList(filters: Record<string, any>): Promise<Eq
             isAvailable: filters.availability ?? null,  // Ensure boolean values are passed correctly
             searchTerm: filters.searchTerm || ''
         };
-
-        // Remove null or undefined values from params
-        //Object.keys(params).forEach(key => params[key] === null && delete params[key]);
 
         logger.info('Final API Query Params:', params);
 
@@ -314,10 +304,7 @@ export async function createEquipment(equipment: Partial<any>): Promise<Equipmen
     try {
 
         equipment.createdBy = "Admin";
-        // logger.info('Creating new equipment', { equipment });
-        // // Create a proper Equipment instance first
-        // const equipmentInstance = new Equipment(equipment);
-        // const iequipment = convertToIEquipment(equipmentInstance);
+
         const response = await api.post(API_ENDPOINTS.EQUIPMENT, equipment);
         return response.data;
     } catch (error) {
@@ -342,10 +329,8 @@ export async function assignEquipment(equipment: any): Promise<void> {
     try {
 
         logger.info('Assigning equipment', { equipment });
-        // await api.post(`equipment/`+ route.params.id +``, { equipmentId, inspectorId });
         await api.put(`/v1/equipment/`+ equipment.equipmentId +`/assign`, equipment);
     } catch (error) {
-        // logger.error('Failed to assign equipment', { error, equipment, inspectorId });
         throw createError(400, 'Failed to assign equipment', { cause: error });
     }
 }

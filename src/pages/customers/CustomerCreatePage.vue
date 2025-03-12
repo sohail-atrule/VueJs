@@ -49,7 +49,7 @@ src\pages\customers\CustomerCreatePage.vue
                 dense
                 lazy-rules
                 :disable="isEditMode"
-                
+
                 @update:model-value="handleInput"
               /> -->
             </div>
@@ -78,7 +78,9 @@ src\pages\customers\CustomerCreatePage.vue
                 emit-value
                 map-options
                 lazy-rules
-                
+                disable
+
+
                 />
                 <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
@@ -105,6 +107,7 @@ src\pages\customers\CustomerCreatePage.vue
                 outlined
                 dense
                 lazy-rules
+                disable
                 />
                 <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
@@ -117,6 +120,7 @@ src\pages\customers\CustomerCreatePage.vue
                 outlined
                 dense
                 lazy-rules
+                disable
               />
               <!-- :rules="[
                 val => !!val || t('validation.required'),
@@ -131,6 +135,7 @@ src\pages\customers\CustomerCreatePage.vue
                 outlined
                 dense
                 lazy-rules
+                disable
                 />
                 <!-- :rules="[val => !!val || t('validation.required')]" -->
             </div>
@@ -201,7 +206,7 @@ const regionOptions = computed(() => [
 const statusOptions = computed(() => [
   { label: t('customer.status.active'), value: CustomerStatus.Active },
   { label: t('customer.status.inactive'), value: CustomerStatus.Inactive },
-  { label: t('customer.status.pending'), value: CustomerStatus.Pending },
+
 ]);
 
 const fetchCustomer = async () => {
@@ -210,7 +215,10 @@ const fetchCustomer = async () => {
       loading.value = true;
       const customer = await customerStore.fetchCustomerById(Number(route.params.id));
       if (customer) {
-        formData.value = { ...customer };
+        formData.value = {
+          ...customer,
+          status: customer.isActive ? CustomerStatus.Active : CustomerStatus.Inactive, // Convert isActive to status
+        };
       }
     } catch (error) {
       $q.notify({
@@ -230,16 +238,20 @@ const handleSubmit = async () => {
   try {
     loading.value = true;
 
+    const customerData = {
+      ...formData.value,
+      isActive: formData.value.status === CustomerStatus.Active, // Convert status back to isActive
+    };
+
     if (isEditMode.value) {
       const id = route.params.id;
-      const updates  = formData.value;
-       await customerStore.updateCustomer(Number(id), updates);
+      await customerStore.updateCustomer(Number(id), customerData);
       $q.notify({
         type: 'positive',
         message: t('customer.edit.success'),
       });
     } else {
-      await customerStore.createCustomer(formData.value);
+      await customerStore.createCustomer(customerData);
       $q.notify({
         type: 'positive',
         message: t('customer.create.success'),

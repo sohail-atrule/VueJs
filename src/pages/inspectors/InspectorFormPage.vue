@@ -129,11 +129,7 @@ async function handleSubmit() {
       message: 'Inspector created successfully'
     });
     router.push('/dashboard/inspectors')
-    // If you want to do something else on success, like refresh a list:
-    // await inspectorStore.searchInspectors(...);
 
-    // Or navigate to the inspector list:
-    // router.push({ name: 'inspector-list' });
   } catch (error: any) {
     // Show a more detailed error if available
     const errorMessage = error?.response?.data?.error || 'Error creating inspector';

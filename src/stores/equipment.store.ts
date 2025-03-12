@@ -86,9 +86,6 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
   // Actions
   const loadEquipment = async (forceRefresh = false, filters: Record<string, any> = {}) => {
-    // if (!forceRefresh && isCacheValid.value) {
-    //   return equipment.value;
-    // }
 
     loading.value = true;
     error.value = null;
@@ -129,10 +126,6 @@ export const useEquipmentStore = defineStore('equipment', () => {
   };
 
   const selectEquipment = async (id: number) => {
-    // if (cache.value[id]) {
-    //   selectedEquipment.value = cache.value[id];
-    //   return;
-    // }
 
     loading.value = true;
     error.value = null;
@@ -147,28 +140,27 @@ export const useEquipmentStore = defineStore('equipment', () => {
       notificationStore.error(`Failed to load equipment details: ${errorMessage}`);
     } finally {
       loading.value = false;
-    } 
+    }
   };
 
    let isSaving = false;
 
   const createNewEquipment = async (equipmentData: Omit<any, 'id'>) => {
-   
-    if (isSaving) return; 
+
+    if (isSaving) return;
       isSaving = true;
 
     loading.value = true;
     error.value = null;
 
     try {
+
       const response = await createEquipment(equipmentData);
-      // equipment.value.push(response);
-      // cache.value[response.id] = response;
       notificationStore.success('Equipment created successfully');
       return response;
     } catch (err) {
-      // error.value = err.message;
-      // notificationStore.error(`Failed to create equipment: ${err.message}`);
+      error.value = err.message;
+      notificationStore.error(`Failed to create equipment: ${err.message}`);
       throw err;
     } finally {
       loading.value = false;

@@ -147,8 +147,6 @@ const emit = defineEmits<{
 }>();
 
 const { isAuthenticated, logout } = useAuth();
-// const { getUserById, updateUser, validateUserData } = useUser();
-// const { showSuccess, showError } = useNotification();
 
 const error = ref<string | null>(null);
 const formData = ref({
@@ -170,27 +168,6 @@ watch(() => props.userData, (newUserData) => {
 }, { immediate: true });
 
 const handleUpdateProfile = async () => {
-  // try {
-  //   const isValid = await validateUserData(formData.value);
-  //   if (!isValid) {
-  //     throw new Error('Invalid form data');
-  //   }
-
-  //   if (!props.userData) {
-  //     throw new Error('No user data available');
-  //   }
-
-  //   // const updatedUser = await updateUser({
-  //   //   ...props.userData,
-  //   //   ...formData.value
-  //   // });
-
-  //   // emit('update:profile', updatedUser);
-  //   showSuccess('Profile updated successfully');
-  // } catch (err) {
-  //   error.value = err instanceof Error ? err.message : 'Failed to update profile';
-  //   showError(error.value);
-  // }
 };
 
 const resetForm = () => {
@@ -210,20 +187,11 @@ const handleLogout = async () => {
     emit('security-event', { type: 'USER_LOGOUT' });
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to logout';
-    //showError(error.value);
   }
 };
 
 onMounted(() => {
   if (!props.userData && isAuthenticated.value) {
-    // getUserById(isAuthenticated.value)
-    //   .then(userData => {
-    //     emit('update:profile', userData);
-    //   })
-    //   .catch(err => {
-    //     error.value = err instanceof Error ? err.message : 'Failed to load profile';
-    //     showError(error.value);
-    //   });
   }
 });
 </script>

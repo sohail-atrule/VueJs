@@ -26,6 +26,7 @@ export class AuditService {
     return authStore.user?.email || 'admin@test.com';
   }
 
+  //to be implemented in future
   public async logAction(
     entityType: string,
     entityId: string,

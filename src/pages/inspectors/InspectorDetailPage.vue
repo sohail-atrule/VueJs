@@ -128,7 +128,7 @@
                 @submitted="handleDrugTestSubmitted"
                 class="q-mb-lg"
               />
-              
+
               <div class="text-h6 q-mb-md">Drug Test History</div>
               <QTable
                 :rows="selectedInspector.drugTests"
@@ -180,7 +180,7 @@ export default defineComponent({
     const route = useRoute();
     const router = useRouter();
     const { selectedInspector } = useInspector();
-    
+
     const loading = ref(false);
     const error = ref<string | null>(null);
     const activeTab = ref('details');
@@ -202,14 +202,15 @@ export default defineComponent({
       return (
         selectedInspector.value.status === 'Available' &&
         selectedInspector.value.certifications.some(cert => new Date(cert.expiryDate) > new Date()) &&
-        selectedInspector.value.drugTests.some(test => 
+        selectedInspector.value.drugTests.some(test =>
           new Date(test.testDate) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
         )
       );
     });
 
+    //to be implemented
     const equipmentSummary = computed(() => {
-      if (!selectedInspector.value) return {};
+      //if (!selectedInspector.value) return {};
       const summary: Record<string, number> = {};
       // selectedInspector.value.equipmentAssignments.forEach(assignment => {
       //   const type = assignment.equipment.type;

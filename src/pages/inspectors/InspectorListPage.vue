@@ -216,7 +216,7 @@ export default defineComponent({
     // Initialize from URL parameters
     onMounted(async () => {
       const { lat, lng, radius, status, certifications, active } = route.query;
-      
+
       if (lat && lng) {
         await handleLocationSearch({
           location: {
@@ -239,15 +239,15 @@ export default defineComponent({
     });
 
     // Error boundary
-    // onErrorCaptured((err) => {
-    //   console.error('Inspector list error:', err);
-    //   $q.notify({
-    //     type: 'negative',
-    //     message: 'An error occurred while loading inspectors',
-    //     position: 'top'
-    //   });
-    //   return false;
-    // });
+    onErrorCaptured((err) => {
+      console.error('Inspector list error:', err);
+      $q.notify({
+        type: 'negative',
+        message: 'An error occurred while loading inspectors',
+        position: 'top'
+      });
+      return false;
+    });
 
     return {
       inspectors,

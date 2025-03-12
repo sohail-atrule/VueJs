@@ -112,55 +112,8 @@ export class UserApiClient {
     sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: IUser[]; total: number }> {
     try {
-      // logger.info('GET /api/v1/users', params);
-      // // Simulate API delay
-      // await new Promise((resolve) => setTimeout(resolve, 200));
 
-      // let filteredUsers = [...dummyUsers];
-
-      // // Apply search term filter
-      // if (params.searchTerm) {
-      //   const term = params.searchTerm.toLowerCase();
-      //   filteredUsers = filteredUsers.filter(
-      //     (user) =>
-      //       user.firstName.toLowerCase().includes(term) ||
-      //       user.lastName.toLowerCase().includes(term) ||
-      //       user.email.toLowerCase().includes(term)
-      //   );
-      // }
-
-      // // Apply active status filter
-      // if (typeof params.isActive === 'boolean') {
-      //   filteredUsers = filteredUsers.filter((user) => user.isActive === params.isActive);
-      // }
-
-      // // Sort users
-      // const sortField = params.sortBy || 'lastName';
-      // const sortOrder = params.sortOrder === 'desc' ? -1 : 1;
-      // filteredUsers.sort((a, b) => {
-      //   const aValue = a[sortField as keyof IUser];
-      //   const bValue = b[sortField as keyof IUser];
-      //   if (typeof aValue === 'string' && typeof bValue === 'string') {
-      //     return sortOrder * aValue.localeCompare(bValue);
-      //   }
-      //   if (typeof aValue === 'number' && typeof bValue === 'number') {
-      //     return sortOrder * (aValue - bValue);
-      //   }
-      //   return 0;
-      // });
-
-      // // Calculate total before pagination
-      // const total = filteredUsers.length;
-
-      // // Apply pagination
-      // const start = (params.pageNumber - 1) * params.pageSize;
-      // const end = start + params.pageSize;
-      // const users = filteredUsers.slice(start, end);
-
-      // logger.info('Response:', { total, users: users.length });
-      // return { users, total };
-
-      logger.info('GET /api/v1/users', params);      
+      logger.info('GET /api/v1/users', params);
       const response = await api.get(API_ENDPOINTS.USERS, {
         params: {
           pageNumber: params.pageNumber,
@@ -171,16 +124,6 @@ export class UserApiClient {
           sortOrder: params.sortOrder,
         },
       });
-      // const response = await axios.get(`https://192.168.1.28:7031/api/v1/users`, {
-      //   params: {
-      //     pageNumber: params.pageNumber,
-      //     pageSize: params.pageSize,
-      //     searchTerm: params.searchTerm || undefined,
-      //     isActive: params.isActive !== undefined ? params.isActive : undefined,
-      //     sortBy: params.sortBy,
-      //     sortOrder: params.sortOrder,
-      //   },
-      // });
 
       const { users, totalCount } = response.data;
 
@@ -245,7 +188,7 @@ export class UserApiClient {
    */
 
   async updateUser(id: number, updates: Partial<IUser>): Promise<IUser> {
-    
+
     try {
       logger.info(`PUT /api/v1/users/${id}`, { updates });
       const response = await api.put(`${API_ENDPOINTS.USERS}/${id}`, updates, {

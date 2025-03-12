@@ -61,15 +61,6 @@
               :disable="props.row.status?.toUpperCase() !== 'AVAILABLE'"
               @click.stop="handleAssignEquipment(props.row)"
             />
-            <!-- <q-btn
-              flat
-              round
-              size="sm"
-              icon="keyboard_return"
-              :aria-label="t('equipment.actions.return')"
-              :disable="props.row.status?.toUpperCase() !== 'IN_USE'"
-              @click.stop="handleReturnEquipment(props.row)"
-            /> -->
             <q-btn
               flat
               round
@@ -164,7 +155,7 @@ const tableColumns = computed(() => [
     name: 'status',
     label: 'Status',
     field: 'status',
-    align: 'left'  as const, 
+    align: 'left'  as const,
     sortable: false
   },
   {

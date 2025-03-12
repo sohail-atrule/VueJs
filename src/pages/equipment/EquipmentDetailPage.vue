@@ -1,393 +1,884 @@
+const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
 <template>
-  <q-page padding>
-    <div class="row q-col-gutter-md">
-      <!-- Welcome Section -->
+  <q-page class="equipment-detail-page" role="main">
+    <!-- Page Header -->
+    <div class="row q-pa-md items-center justify-between">
+      <div class="col-auto">
+        <q-breadcrumbs>
+          <q-breadcrumbs-el label="Equipment" to="/equipment" />
+          <q-breadcrumbs-el :label="equipment?.serialNumber || 'Loading...'" />
+        </q-breadcrumbs>
+        <h1 class="text-h4 q-mt-sm">Equipment Details</h1>
+      </div>
+      <div class="col-auto">
+        <q-btn-group>
+          <q-btn
+            v-if="canEditEquipment && !isInspector"
+            color="primary"
+            icon="edit"
+            label="Edit"
+            :loading="loading"
+            @click="showEditDialog = true"
+          />
+          <q-btn
+            v-if="canAssignEquipment"
+            color="secondary"
+            icon="person_add"
+            label="Assign"
+            :loading="loading"
+            :disable="equipmentStatus !== 'AVAILABLE'"
+            @click="showAssignDialog = true"
+          />
+          <q-btn
+            v-if="canEditEquipment"
+            color="info"
+            icon="keyboard_return"
+            label="Return"
+            :loading="loading"
+            :disable="equipmentStatus !== 'IN_USE'"
+            @click="showReturnDialog = true"
+          />
+          <q-btn
+            v-if="canEditEquipment && !isInspector"
+            color="warning"
+            icon="build"
+            label="Maintenance"
+            :loading="loading"
+            :disable="equipmentStatus === 'MAINTENANCE' || equipmentStatus === 'IN_USE'"
+            @click="showMaintenanceDialog = true"
+          />
+        </q-btn-group>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <q-inner-loading :showing="loading">
+      <q-spinner-dots size="50px" color="primary" />
+    </q-inner-loading>
+
+    <!-- Error State -->
+    <div v-if="error" class="q-pa-md">
+      <q-banner class="bg-negative text-white" rounded>
+        {{ error }}
+        <template v-slot:action>
+          <q-btn flat color="white" label="Retry" @click="loadEquipmentDetails" />
+        </template>
+      </q-banner>
+    </div>
+
+    <!-- Equipment Details -->
+    <div v-if="equipment && !loading" class="row q-pa-md q-col-gutter-md">
+      <!-- Basic Information -->
       <div class="col-12">
-        <div class="welcome-section q-mb-lg">
-          <div class="text-h4 text-weight-bold q-mb-sm">Operations Dashboard</div>
-          <div class="text-subtitle1 text-grey-7">
-            Last sync: {{ new Date(lastSyncTime).toLocaleString() }}
-          </div>
-        </div>
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Basic Information</div>
+            <q-list>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Serial Number</q-item-label>
+                  <q-item-label>{{ equipment.serialNumber }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Model</q-item-label>
+                  <q-item-label>{{ equipment.model }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Type</q-item-label>
+                  <q-item-label>{{ equipment.type }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Status</q-item-label>
+                  <q-item-label>
+                    <q-chip
+                      :color="getStatusColor(equipmentStatus)"
+                      text-color="white"
+                      size="sm"
+                    >
+                      {{ equipmentStatus }}
+                    </q-chip>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
       </div>
 
-      <!-- Equipment Statistics -->
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
+      <!-- Specifications -->
+      <div class="col-12 col-md-6" style="display:none;">
+        <q-card>
           <q-card-section>
-            <div class="text-grey-8 text-subtitle1">Available Equipment</div>
-            <div class="row items-center justify-between q-mt-sm">
-              <div class="text-h4">{{ availableEquipmentCount }}</div>
-              <q-icon name="check_circle" size="32px" class="text-positive" />
+            <div class="text-h6">Specifications</div>
+            <q-list v-if="equipment.specifications">
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Manufacturer</q-item-label>
+                  <q-item-label>{{ equipment.specifications.manufacturer }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Model</q-item-label>
+                  <q-item-label>{{ equipment.specifications.model }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Calibration Due</q-item-label>
+                  <q-item-label>{{ formatDate(equipment.specifications.calibrationDue) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>Warranty Until</q-item-label>
+                  <q-item-label>{{ formatDate(equipment.specifications.warranty) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <div v-else class="text-grey-6">No specifications available</div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Maintenance History -->
+      <div class="col-12" style="display: none">
+        <q-card aria-disabled="true">
+          <q-card-section>
+            <div class="text-h6">Maintenance History</div>
+            <q-table disable
+              v-if="equipment?.maintenanceHistory?.length"
+              :rows="equipment.maintenanceHistory || []"
+              :columns="maintenanceColumns"
+              row-key="id"
+              flat
+              bordered
+            >
+              <template v-slot:body-cell-type="props">
+                <q-td :props="props">
+                  <q-chip
+                    :color="getMaintenanceTypeColor(props.value)"
+                    text-color="white"
+                    size="sm"
+                  >
+                    {{ props.value }}
+                  </q-chip>
+                </q-td>
+              </template>
+            </q-table>
+            <div v-else class="text-grey-6 q-pa-md">No maintenance history available</div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Documents -->
+      <div class="col-12" style="display: none">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Documents</div>
+            <div class="row q-col-gutter-md q-mt-md">
+              <div
+                v-for="doc in equipment?.documents || []"
+                :key="doc.id"
+                class="col-12 col-sm-6 col-md-4"
+              >
+                <q-card class="document-card" flat bordered>
+                  <q-card-section>
+                    <div class="row items-center no-wrap">
+                      <div class="col">
+                        <div class="text-subtitle2">{{ doc.name }}</div>
+                        <div class="text-caption text-grey">{{ doc.type }}</div>
+                      </div>
+                      <div class="col-auto">
+                        <q-btn
+                         disabled
+                          flat
+                          round
+                          color="primary"
+                          icon="download"
+                          :href="doc.url"
+                          target="_blank"
+                        />
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div v-if="!equipment?.documents?.length" class="col-12 text-grey-6 q-pa-md">
+                No documents available
+              </div>
             </div>
-            <div class="text-caption text-grey-8">Ready for Assignment</div>
           </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
-          <q-card-section>
-            <div class="text-grey-8 text-subtitle1">Assigned Equipment</div>
-            <div class="row items-center justify-between q-mt-sm">
-              <div class="text-h4">{{ assignedEquipmentCount }}</div>
-              <q-icon name="assignment_turned_in" size="32px" class="text-warning" />
-            </div>
-            <div class="text-caption text-grey-8">Currently in Use</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
-          <q-card-section>
-            <div class="text-grey-8 text-subtitle1">Maintenance Required</div>
-            <div class="row items-center justify-between q-mt-sm">
-              <div class="text-h4">{{ maintenanceRequiredCount }}</div>
-              <q-icon name="build" size="32px" class="text-negative" />
-            </div>
-            <div class="text-caption text-grey-8">Needs Attention</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="dashboard-card">
-          <q-card-section>
-            <div class="text-grey-8 text-subtitle1">Available Inspectors</div>
-            <div class="row items-center justify-between q-mt-sm">
-              <div class="text-h4">{{ availableInspectorsCount }}</div>
-              <q-icon name="engineering" size="32px" class="text-primary" />
-            </div>
-            <div class="text-caption text-grey-8">Ready for Assignment</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="col-12 col-md-4">
-        <q-card class="dashboard-card">
-          <q-card-section>
-            <div class="text-h6">Quick Actions</div>
-          </q-card-section>
-          <q-list padding>
-            <q-item clickable v-ripple @click="navigateTo('/equipment/new')">
-              <q-item-section avatar>
-                <q-icon name="add_circle" color="primary" />
-              </q-item-section>
-              <q-item-section>Add New Equipment</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click="navigateTo('/equipment')">
-              <q-item-section avatar>
-                <q-icon name="assignment" color="primary" />
-              </q-item-section>
-              <q-item-section>Manage Equipment</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple @click="navigateTo('/inspectors')">
-              <q-item-section avatar>
-                <q-icon name="people" color="primary" />
-              </q-item-section>
-              <q-item-section>View Inspectors</q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
-      </div>
-
-      <!-- Recent Equipment Activity -->
-      <div class="col-12 col-md-8">
-        <q-card class="dashboard-card">
-          <q-card-section class="row items-center justify-between">
-            <div class="text-h6">Recent Equipment Activity</div>
-            <q-btn flat color="primary" label="View All" @click="navigateTo('/equipment')" />
-          </q-card-section>
-          <q-list padding>
-            <q-item v-for="activity in recentEquipmentActivity" :key="activity.id">
-              <q-item-section avatar>
-                <q-icon :name="activity.icon" :color="activity.color" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ activity.description }}</q-item-label>
-                <q-item-label caption>{{ formatDate(activity.timestamp) }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-btn
-                  flat
-                  round
-                  color="grey"
-                  icon="chevron_right"
-                  @click="navigateToEquipment(activity.equipmentId)"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-card>
-      </div>
-
-      <!-- Equipment Maintenance Schedule -->
-      <div class="col-12">
-        <q-card class="dashboard-card">
-          <q-card-section class="row items-center justify-between">
-            <div class="text-h6">Upcoming Maintenance</div>
-            <q-btn flat color="primary" label="Schedule Maintenance" @click="scheduleNewMaintenance" />
-          </q-card-section>
-          <q-table
-            :rows="upcomingMaintenance"
-            :columns="maintenanceColumns"
-            row-key="id"
-            flat
-            bordered
-          >
-            <template v-slot:body-cell-status="props">
-              <q-td :props="props">
-                <q-chip
-                  :color="getMaintenanceStatusColor(props.value)"
-                  text-color="white"
-                  size="sm"
-                >
-                  {{ props.value }}
-                </q-chip>
-              </q-td>
-            </template>
-            <template v-slot:body-cell-actions="props">
-              <q-td :props="props" class="q-gutter-sm">
-                <q-btn
-                  flat
-                  round
-                  size="sm"
-                  color="primary"
-                  icon="visibility"
-                  @click="viewMaintenanceDetails(props.row)"
-                />
-                <q-btn
-                  flat
-                  round
-                  size="sm"
-                  color="positive"
-                  icon="check"
-                  @click="completeMaintenance(props.row)"
-                />
-              </q-td>
-            </template>
-          </q-table>
         </q-card>
       </div>
     </div>
+
+    <!-- Edit Dialog -->
+    <q-dialog v-model="showEditDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Edit Equipment</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="handleEquipmentUpdate" ref="editForm">
+            <q-input
+              v-model="editData.model"
+              label="Model"
+              :rules="[val => !!val || 'Model is required']"
+            />
+            <q-input
+              v-model="editData.condition"
+              label="Condition"
+              :rules="[val => !!val || 'Condition is required']"
+            />
+            <q-input
+              v-model="editData.notes"
+              label="Notes"
+              type="textarea"
+            />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Save" color="primary" @click="handleEquipmentUpdate" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Assignment Dialog -->
+    <q-dialog v-model="showAssignDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Assign Equipment</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="handleAssignment" ref="assignForm">
+            <q-select
+              v-model="assignmentData.inspectorId"
+              :options="availableInspectors"
+              :loading="!availableInspectors.length"
+              label="Inspector"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
+              :rules="[val => !!val || 'Inspector is required']"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    No available inspectors found
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+            <q-input
+              v-model="assignmentData.assignmentCondition"
+              label="Current Condition"
+              class="q-mt-md"
+              :rules="[val => !!val || 'Condition is required']"
+            />
+            <q-input
+              v-model="assignmentData.notes"
+              label="Notes"
+              type="textarea"
+              class="q-mt-md"
+            />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            flat
+            label="Cancel"
+            color="primary"
+            v-close-popup
+            :disable="loading"
+          />
+          <q-btn
+            label="Assign"
+            color="primary"
+            @click="handleAssignment"
+            :loading="loading"
+            :disable="loading || !assignmentData.inspectorId"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Maintenance Dialog -->
+    <q-dialog v-model="showMaintenanceDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Send to Maintenance</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="handleMaintenanceSubmit" ref="maintenanceForm">
+            <q-select
+              v-model="maintenanceData.type"
+              :options="maintenanceTypes"
+              label="Maintenance Type"
+              :rules="[val => !!val || 'Maintenance type is required']"
+            />
+            <q-input
+              v-model="maintenanceData.technician"
+              label="Technician"
+              class="q-mt-md"
+              :rules="[val => !!val || 'Technician name is required']"
+            />
+            <q-input
+              v-model="maintenanceData.notes"
+              label="Notes"
+              type="textarea"
+              class="q-mt-md"
+              :rules="[val => !!val || 'Notes are required']"
+            />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            flat
+            label="Cancel"
+            color="primary"
+            v-close-popup
+            :disable="loading"
+          />
+          <q-btn
+            label="Send"
+            color="warning"
+            @click="handleMaintenanceSubmit"
+            :loading="loading"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Return Dialog -->
+    <q-dialog v-model="showReturnDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center">
+          <div class="text-h6">Return Equipment</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="handleReturnSubmit" ref="returnForm">
+            <q-select
+              v-model="returnData.returnCondition"
+              :options="conditionOptions"
+              label="Return Condition"
+              class="q-mt-md"
+              :rules="[val => !!val || 'Return condition is required']"
+              emit-value
+              map-options
+            />
+            <q-input
+              v-model="returnData.notes"
+              label="Notes"
+              type="textarea"
+              class="q-mt-md"
+              :rules="[val => !!val || 'Notes are required']"
+            />
+          </q-form>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn
+            flat
+            label="Cancel"
+            color="primary"
+            v-close-popup
+            :disable="loading"
+          />
+          <q-btn
+            label="Return"
+            color="info"
+            @click="handleReturnSubmit"
+            :loading="loading"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { defineComponent, ref, computed, onMounted, onErrorCaptured, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { Equipment } from '@/models/equipment.model';
+import type { EquipmentAssignment } from '@/models/equipment-types';
 import { useEquipment } from '@/composables/useEquipment';
+import { useAuditLog } from '@/composables/useAuditLog';
 import { useInspectorStore } from '@/stores/inspector.store';
-import { formatDate } from '@/utils/date.util';
+import { useEquipmentStore } from '@/stores/equipment.store';
+import { useAuthStore } from '@/stores/auth.store';
+import { UserRoleType } from '@/models/user.model';
+import { InspectorStatus } from '@/models/inspector.model';
+import { assignEquipment as assignEquipmentToInspector } from '@/api/equipment.api';
 
 export default defineComponent({
-  name: 'OperationalDashboard',
+  name: 'EquipmentDetailPage',
 
   setup() {
+    const route = useRoute();
     const router = useRouter();
     const $q = useQuasar();
-    const { 
-      equipment,
-      availableEquipment,
-      assignedEquipment,
-      maintenanceRequired,
-      lastUpdateTime
-    } = useEquipment();
+    const { logAction } = useAuditLog();
     const inspectorStore = useInspectorStore();
+    const equipmentStore = useEquipmentStore();
+    const authStore = useAuthStore();
 
-    // Computed values for statistics
-    const availableEquipmentCount = computed(() => availableEquipment.value.length);
-    const assignedEquipmentCount = computed(() => assignedEquipment.value.length);
-    const maintenanceRequiredCount = computed(() => maintenanceRequired.value.length);
-    const availableInspectorsCount = computed(() => 
-      inspectorStore.inspectorsByStatus['Available'].length
-    );
+    // Error handling
+    const handleError = (err: unknown) => {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      $q.notify({
+        type: 'negative',
+        message: errorMessage,
+        position: 'top'
+      });
+      return false; // Prevent error from propagating
+    };
 
-    // Recent activity tracking
-    const recentEquipmentActivity = ref([
-      {
-        id: 1,
-        equipmentId: 1,
-        icon: 'assignment_turned_in',
-        color: 'positive',
-        description: 'Test Kit Pro assigned to Inspector John',
-        timestamp: new Date()
-      },
-      {
-        id: 2,
-        equipmentId: 2,
-        icon: 'build',
-        color: 'warning',
-        description: 'Inspector Tablet scheduled for maintenance',
-        timestamp: new Date(Date.now() - 86400000)
-      }
-    ]);
+    onErrorCaptured((err, instance, info) => {
+      handleError(err);
+      return false; // Prevent error from propagating
+    });
 
-    // Maintenance schedule
-    const maintenanceColumns = [
-      { name: 'equipmentId', label: 'Equipment ID', field: 'equipmentId', sortable: true },
-      { name: 'name', label: 'Equipment Name', field: 'name', sortable: true },
-      { name: 'type', label: 'Type', field: 'type', sortable: true },
-      { name: 'dueDate', label: 'Due Date', field: 'dueDate', sortable: true },
-      { name: 'status', label: 'Status', field: 'status', sortable: true },
-      { name: 'actions', label: 'Actions', field: 'actions' }
+    // Equipment store functionality
+    const {
+      loading,
+      error,
+      equipment,
+      selectedEquipment,
+      fetchEquipment,
+      updateEquipment
+    } = useEquipment();
+
+
+
+    // Computed property for current equipment
+    const currentEquipment = computed(() => selectedEquipment.value || equipment.value?.[0]);
+
+    // Computed property for equipment status
+    const equipmentStatus = computed(() => currentEquipment.value?.status?.toUpperCase() || '');
+
+    // Local state
+    const showEditDialog = ref(false);
+    const showAssignDialog = ref(false);
+    const showMaintenanceDialog = ref(false);
+    const showReturnDialog = ref(false);
+    const editData = ref<Partial<Equipment>>({});
+    const assignmentData = ref<Partial<EquipmentAssignment>>({});
+    const loadingHistory = ref(false);
+    const availableInspectors = ref<{ label: string; value: number }[]>([]);
+    const maintenanceData = ref({
+      type: '',
+      technician: '',
+      notes: ''
+    });
+    const returnData = ref({
+      returnCondition: '',
+      notes: ''
+    });
+
+    const maintenanceTypes = [
+      'Regular Maintenance',
+      'Calibration',
+      'Repair',
+      'Software Update',
+      'Hardware Update',
+      'Safety Check'
     ];
 
-    const upcomingMaintenance = ref([
-      {
-        id: 1,
-        equipmentId: 'EQ001',
-        name: 'Test Kit Pro',
-        type: 'Calibration',
-        dueDate: '2024-06-01',
-        status: 'SCHEDULED'
-      },
-      {
-        id: 2,
-        equipmentId: 'EQ002',
-        name: 'Inspector Tablet',
-        type: 'Software Update',
-        dueDate: '2024-05-15',
-        status: 'PENDING'
+    // Table columns for assignment history
+    const historyColumns = [
+      { name: 'assignedDate', label: 'Assigned Date', field: 'assignedDate', sortable: true },
+      { name: 'inspectorId', label: 'Inspector', field: 'inspectorId', sortable: true },
+      { name: 'assignmentCondition', label: 'Condition', field: 'assignmentCondition' },
+      { name: 'returnedDate', label: 'Returned Date', field: 'returnedDate', sortable: true },
+      { name: 'status', label: 'Status', field: 'status' }
+    ];
+
+    // Table columns for maintenance history
+    const maintenanceColumns = [
+      { name: 'date', label: 'Date', field: 'date', sortable: true },
+      { name: 'type', label: 'Type', field: 'type', sortable: true },
+      { name: 'technician', label: 'Technician', field: 'technician' },
+      { name: 'notes', label: 'Notes', field: 'notes' }
+    ];
+
+    // Permission computed properties
+    const isInspector = computed(() => {
+      return authStore.hasRole(UserRoleType.Inspector);
+    });
+    const canEditEquipment = computed(() => true); // TODO: Implement actual permission check
+    const canAssignEquipment = computed(() => true); // TODO: Implement actual permission check
+
+    // Utility functions
+    const formatDate = (date: string | Date) => {
+      return new Date(date).toLocaleDateString();
+    };
+
+    const getStatusColor = (status: string) => {
+      switch (status?.toUpperCase()) {
+        case 'AVAILABLE':
+          return 'positive';
+        case 'IN_USE':
+          return 'warning';
+        case 'MAINTENANCE':
+          return 'orange';
+        case 'RETIRED':
+          return 'negative';
+        default:
+          return 'grey';
       }
-    ]);
-
-    // Navigation functions
-    const navigateTo = (path: string) => {
-      router.push(path);
     };
 
-    const navigateToEquipment = (equipmentId: number) => {
-      router.push(`/equipment/${equipmentId}`);
-    };
-
-    // Maintenance functions
-    const getMaintenanceStatusColor = (status: string) => {
-      const colors: Record<string, string> = {
-        SCHEDULED: 'primary',
-        PENDING: 'warning',
-        OVERDUE: 'negative',
-        COMPLETED: 'positive'
+    const getMaintenanceTypeColor = (type: string) => {
+      const colors: { [key: string]: string } = {
+        'Regular': 'primary',
+        'Repair': 'warning',
+        'Software': 'info'
       };
-      return colors[status] || 'grey';
+      return colors[type] || 'grey';
     };
 
-    const scheduleNewMaintenance = () => {
-      // TODO: Implement maintenance scheduling
-      $q.notify({
-        message: 'Maintenance scheduling feature coming soon',
-        color: 'info'
-      });
-    };
-
-    const viewMaintenanceDetails = (maintenance: any) => {
-      router.push(`/equipment/${maintenance.equipmentId}/maintenance/${maintenance.id}`);
-    };
-
-    const completeMaintenance = (maintenance: any) => {
-      // TODO: Implement maintenance completion
-      $q.notify({
-        message: 'Maintenance marked as complete',
-        color: 'positive'
-      });
-    };
-
-    // Lifecycle hooks
-    onMounted(async () => {
+    // Load equipment details
+    const loadEquipmentDetails = async () => {
       try {
-        await Promise.all([
-          inspectorStore.searchInspectors(null, null, inspectorStore.inspectorsByStatus['Available'], [], false),
-          // Add other initialization calls here
-        ]);
-      } catch (error) {
-        console.error('Failed to initialize dashboard:', error);
+
+        const equipmentId = parseInt(route.params.id as string);
+        if (isNaN(equipmentId)) {
+          throw new Error('Invalid equipment ID');
+        }
+
+        loading.value = true;
+        await fetchEquipment(equipmentId);
+
+        if (!currentEquipment.value) {
+          throw new Error('Equipment not found');
+        }
+
+        // Check for edit or assign query params
+        if (route.query.edit === 'true') {
+          showEditDialog.value = true;
+        } else if (route.query.assign === 'true') {
+          showAssignDialog.value = true;
+        } else if (route.query.maintenance === 'true') {
+          showMaintenanceDialog.value = true;
+        } else if (route.query.return === 'true') {
+          showReturnDialog.value = true;
+        }
+
+        logAction('equipment', equipmentId, 'view', { userId: 123 });
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : 'Failed to load equipment';
+        $q.notify({
+          type: 'negative',
+          message: error.value,
+          position: 'top'
+        });
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Handle dialog close
+    const handleDialogClose = async () => {
+      // Remove query parameters when dialogs are closed
+      if (route.query.edit || route.query.assign || route.query.maintenance || route.query.return) {
+        await router.replace({
+          path: route.path,
+          query: {}
+        });
+      }
+    };
+
+    // Load available inspectors
+    const loadAvailableInspectors = async () => {
+      try {
+        const response = await inspectorStore.searchInspectors(
+          null,  // location
+          null,  // radius
+          [InspectorStatus.Available],  // status
+          [],    // certifications
+          false  // includeUnavailable
+        );
+        availableInspectors.value = (response.items || []).map(inspector => ({
+          label: `${inspector.firstName} ${inspector.lastName} (${inspector.badgeNumber})`,
+          value: inspector.id
+        }));
+      } catch (err) {
+        console.error('Failed to load inspectors:', err);
+        $q.notify({
+          type: 'warning',
+          message: 'Failed to load available inspectors',
+          position: 'top'
+        });
+      }
+    };
+
+    // Watch dialog states to initialize data
+    watch(showEditDialog, async (newValue) => {
+      if (newValue && currentEquipment.value) {
+        // Initialize edit form with current equipment data
+        editData.value = {
+          model: currentEquipment.value.model,
+          condition: currentEquipment.value.condition,
+          notes: currentEquipment.value.notes
+        };
+      } else {
+        await handleDialogClose();
       }
     });
 
+    watch(showAssignDialog, async (newValue) => {
+      if (newValue) {
+        // Load inspectors when opening assign dialog
+        await loadAvailableInspectors();
+        // Initialize assignment form
+        assignmentData.value = {
+          assignmentCondition: currentEquipment.value?.condition || '',
+          notes: ''
+        };
+      } else {
+        await handleDialogClose();
+      }
+    });
+
+    // Load assignment history
+    const loadAssignmentHistory = async (equipmentId: number) => {
+      try {
+        loadingHistory.value = true;
+        const history = await equipmentStore.loadEquipmentHistory(equipmentId);
+        // assignmentHistory.value = history;
+      } catch (err) {
+        console.error('Failed to load assignment history:', err);
+        // Don't show error notification for history load failure
+        // as it's not critical to the main functionality
+      } finally {
+        loadingHistory.value = false;
+      }
+    };
+
+    // Handle equipment updates
+    const handleEquipmentUpdate = async () => {
+      try {
+        if (!currentEquipment.value?.id) return;
+
+        await updateEquipment(currentEquipment.value.id, editData.value);
+
+        // logAction('equipment:update', {
+        //   equipmentId: currentEquipment.value.id,
+        //   changes: editData.value
+        // });
+
+        logAction(
+  'equipment',
+  currentEquipment.value.id,
+  'update',
+  { changes: editData.value }
+);
+
+        showEditDialog.value = false;
+        $q.notify({
+          type: 'positive',
+          message: 'Equipment updated successfully'
+        });
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err instanceof Error ? err.message : 'Failed to update equipment',
+          position: 'top'
+        });
+      }
+    };
+
+    // Handle equipment assignment
+    const handleAssignment = async () => {
+      try {
+        if (!currentEquipment.value?.id) return;
+
+        // await assignEquipment({
+        //   equipmentId: currentEquipment.value.id,
+        //   ...assignmentData.value
+        // });
+
+        await assignEquipmentToInspector({
+          equipmentId: currentEquipment.value.id,
+          ...assignmentData.value
+        })
+
+        logAction(
+          'equipment',                              // entityType (e.g., 'equipment')
+          currentEquipment.value.id,               // entityId (e.g., equipment ID)
+          'assign',                                // action (e.g., 'assign')
+          { assignmentDetails: assignmentData.value } // details (extra info)
+        );
+
+        showAssignDialog.value = false;
+        $q.notify({
+          type: 'positive',
+          message: 'Equipment assigned successfully'
+        });
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err instanceof Error ? err.message : 'Failed to assign equipment',
+          position: 'top'
+        });
+      }
+    };
+
+    // Handle maintenance submission
+    const handleMaintenanceSubmit = async () => {
+      try {
+        if (!currentEquipment.value?.id) return;
+
+        // await equipmentStore.sendEquipmentToMaintenance(currentEquipment.value.id, maintenanceData.value);
+
+        logAction('equipment',
+  currentEquipment.value.id,
+  'maintenance',
+{ maintenanceDetails: maintenanceData.value }
+);
+
+        showMaintenanceDialog.value = false;
+        $q.notify({
+          type: 'positive',
+          message: 'Equipment sent to maintenance successfully'
+        });
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err instanceof Error ? err.message : 'Failed to send equipment to maintenance',
+          position: 'top'
+        });
+      }
+    };
+
+    // Handle return submission
+    const handleReturnSubmit = async () => {
+      try {
+        if (!currentEquipment.value?.id) return;
+        await equipmentStore.processEquipmentReturn(currentEquipment.value.id, {
+          returnCondition: returnData.value.returnCondition,
+          notes: returnData.value.notes,
+          equipmentId: currentEquipment.value.id,
+          returnDate: new Date()
+        });
+
+        // logAction('equipment:return', {
+        //   equipmentId: currentEquipment.value.id,
+        //   returnDetails: returnData.value
+        // });
+
+        showReturnDialog.value = false;
+        $q.notify({
+          type: 'positive',
+          message: 'Equipment returned successfully'
+        });
+
+        // Refresh equipment details
+        await loadEquipmentDetails();
+      } catch (err) {
+        $q.notify({
+          type: 'negative',
+          message: err instanceof Error ? err.message : 'Failed to return equipment',
+          position: 'top'
+        });
+      }
+    };
+
+    // Lifecycle hooks
+    onMounted(() => {
+      loadEquipmentDetails();
+    });
+
+    const conditionOptions = [
+      { label: 'New', value: 'new' },
+      { label: 'Used', value: 'used' },
+      { label: 'Refurbished', value: 'refurbished' },
+      // { label: 'Poor', value: 'poor' }
+    ];
+
     return {
-      // Stats
-      availableEquipmentCount,
-      assignedEquipmentCount,
-      maintenanceRequiredCount,
-      availableInspectorsCount,
-      lastSyncTime: lastUpdateTime,
-
-      // Activity and maintenance
-      recentEquipmentActivity,
-      upcomingMaintenance,
+      // State
+      loading,
+      error,
+      equipment: currentEquipment,
+      equipmentStatus,
+      showEditDialog,
+      showAssignDialog,
+      showMaintenanceDialog,
+      showReturnDialog,
+      editData,
+      assignmentData,
+      maintenanceData,
+      returnData,
+      loadingHistory,
+      historyColumns,
       maintenanceColumns,
+      availableInspectors,
+      maintenanceTypes,
+      conditionOptions,
 
-      // Functions
-      navigateTo,
-      navigateToEquipment,
+      // Computed
+      isInspector,
+      canEditEquipment,
+      canAssignEquipment,
+
+      // Methods
+      loadEquipmentDetails,
+      handleEquipmentUpdate,
+      handleAssignment,
+      handleMaintenanceSubmit,
+      handleReturnSubmit,
       formatDate,
-      getMaintenanceStatusColor,
-      scheduleNewMaintenance,
-      viewMaintenanceDetails,
-      completeMaintenance
+      getStatusColor,
+      getMaintenanceTypeColor,
+      handleDialogClose
     };
   }
 });
 </script>
 
-<style lang="scss" scoped>
-.dashboard-card {
-  height: 100%;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+<style lang="scss">
+.equipment-detail-page {
+  .q-table__container {
+    border-radius: 4px;
+    box-shadow: none;
   }
 
-  .q-card-section {
-    padding: 24px;
-  }
-}
-
-.welcome-section {
-  background: linear-gradient(to right, var(--q-primary), color-mix(in srgb, var(--q-primary) 85%, black));
-  padding: 32px;
-  border-radius: 12px;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  .text-h4 {
-    line-height: 1.2;
-  }
-
-  .text-subtitle1 {
-    opacity: 0.9;
-  }
-}
-
-.q-table {
-  border-radius: 8px;
-  
-  ::v-deep thead tr th {
-    font-weight: 600;
-    color: var(--q-primary);
-  }
-
-  ::v-deep tbody tr:hover {
-    background-color: rgba(0, 0, 0, 0.03);
-  }
-}
-
-.q-list {
-  .q-item {
-    min-height: 48px;
+  .q-card {
     border-radius: 8px;
-    margin: 4px 0;
+  }
 
+  .document-card {
+    transition: all 0.3s ease;
     &:hover {
-      background: rgba(0, 0, 0, 0.03);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
   }
 }
-</style> 
+</style>

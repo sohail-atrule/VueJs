@@ -39,12 +39,6 @@ interface CustomerParams {
  * @param params Query parameters for filtering and pagination
  * @returns Promise resolving to customer list with metadata
  */
-// export const getCustomers = async (params: CustomerParams): Promise<CustomerApiResponse> => {
-//   const response = await api.get('/v1/customers', { params });
-//   return response.data;
-// };
-
-
 export const getCustomers = async ({
   region,
   status,
@@ -74,10 +68,8 @@ export const getCustomers = async ({
     console.log('API Call Params:', params);
 
     // Make the API call with dynamic query parameters
-    // const response = await axios.get(, { params });
     const response = await api.get(API_BASE_PATH, { params });
 
-    //return response.data.customers as CustomerApiResponse;
     return {
       customers: response.data.customers,
       totalCount: response.data.totalCount,
@@ -89,32 +81,11 @@ export const getCustomers = async ({
 };
 
 
-
-
-
-
-
-
-
 /**
  * Retrieves a single customer by ID
  * @param id Customer ID
  * @returns Promise resolving to customer details
  */
-// export const getCustomerById = async (id: number): Promise<ICustomer> => {
-//   const cacheKey = `customer:${id}`;
-//   const cached = cache.get(cacheKey);
-
-//   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-//     return cached.data;
-//   }
-
-//   const response = await api.get(`/v1/customers/${id}`);
-//   cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
-//   return response.data;
-// };
-
-
 export const getCustomerById = async (id: number): Promise<ICustomer> => {
   const cacheKey = `customer:${id}`;
   const cached = cache.get(cacheKey);
@@ -123,7 +94,6 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
     return cached.data;
   }
 
-  // const response = await api.get(`/v1/customers/${id}`);
   const response = await api.get(`/v1/Customers/${id}`);
   cache.set(cacheKey, { data: response.data, timestamp: Date.now() });
   return response.data;
@@ -134,12 +104,6 @@ export const getCustomerById = async (id: number): Promise<ICustomer> => {
  * @param customer Customer data
  * @returns Promise resolving to created customer
  */
-// export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt' | 'modifiedAt'>): Promise<ICustomer> => {
-//   const response = await api.post('/v1/customers', customer);
-//   invalidateCustomerCache();
-//   return response.data;
-// };
-
 export const createCustomer = async (customer: Omit<ICustomer, 'id' | 'createdAt' | 'modifiedAt'>): Promise<ICustomer> => {
   const response = await api.post(`/v1/Customers`, customer);
   invalidateCustomerCache();
@@ -165,7 +129,6 @@ export const updateCustomer = async (id: number, updates: Partial<any>): Promise
  * @returns Promise resolving to void
  */
 export const deleteCustomer = async (id: number): Promise<void> => {
-  // await api.delete(`/v1/customers/${id}`);
   await api.delete(`/v1/Customers/${id}`);
   invalidateCustomerCache(id);
 };

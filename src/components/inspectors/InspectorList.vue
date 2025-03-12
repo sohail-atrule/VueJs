@@ -54,7 +54,7 @@
         row-key="id"
         flat
         bordered
-        @row-click="handleInspectorSelect"
+
         class="cursor-pointer"
       >
         <!-- Status Badge Template -->
@@ -78,6 +78,7 @@
             <div class="row q-gutter-sm justify-end">
               <!-- "View" Button (Icon on the left) -->
               <QBtn
+                disable
                 flat
                 round
                 dense
@@ -279,7 +280,7 @@
       lastMobilizedDate: inspector.lastMobilizedDate || null,
       createdAt: inspector.createdAt || new Date().toISOString(),
       modifiedAt: inspector.modifiedAt || new Date().toISOString(),
-      actions: true, 
+      actions: true,
     }))
   );
 
@@ -297,10 +298,10 @@
       }
 
       await inspectorStore.searchInspectors(
-        null, 
-        null, 
-        statusFilter.value, 
-        [], 
+        null,
+        null,
+        statusFilter.value,
+        [],
         null,
         searchText
       );
@@ -354,7 +355,7 @@
   try {
     await mobilizeInspector(inspector.id);
     showSuccess('Inspector successfully mobilized');
-   
+
     await loadInitialData();
   } catch (error) {
     const errorMessage = error.response?.data?.message || 'Failed to mobilize inspector';

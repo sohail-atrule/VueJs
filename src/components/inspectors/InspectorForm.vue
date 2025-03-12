@@ -83,7 +83,7 @@
           <div class="col-12">
             <h3 class="text-subtitle1 q-mb-sm">Certifications</h3>
           </div>
-          
+
           <div class="col-12" v-for="(cert, index) in formData.certifications" :key="index">
             <QCard flat bordered class="q-pa-sm">
               <div class="row q-col-gutter-sm">
@@ -205,7 +205,6 @@ export default defineComponent({
     const formRef = ref<typeof QForm | null>(null);
     const isSubmitting = ref(false);
     const notificationStore = useNotificationStore();
-    //const { createInspector, updateInspector, validateLocation } = useInspector();
 
     // Form data initialization
     const formData = ref({
@@ -219,11 +218,13 @@ export default defineComponent({
     });
 
     // Validation rules
+    //Disabled valiation for the time being
     const rules = computed(() => ({
+
       // badgeNumber: { required: helpers.withMessage('Badge number is required', required) },
       // status: { required: helpers.withMessage('Status is required', required) },
       // location: {
-      //   latitude: { 
+      //   latitude: {
       //     required: helpers.withMessage('Latitude is required', required),
       //     minValue: helpers.withMessage('Latitude must be between -90 and 90', minValue(-90)),
       //     maxValue: helpers.withMessage('Latitude must be between -90 and 90', maxValue(90))
@@ -238,7 +239,7 @@ export default defineComponent({
       //   $each: helpers.forEach({
       //     name: { required: helpers.withMessage('Certification name is required', required) },
       //     issuingAuthority: { required: helpers.withMessage('Issuing authority is required', required) },
-      //     expiryDate: { 
+      //     expiryDate: {
       //       required: helpers.withMessage('Expiry date is required', required),
       //       futureDate: helpers.withMessage('Expiry date must be in the future', (value) => new Date(value) > new Date())
       //     }
@@ -281,30 +282,16 @@ export default defineComponent({
       try {
         isSubmitting.value = true;
         const isValid = await v$.value.$validate();
-        
+
         if (!isValid) {
           notificationStore.error('Please correct the form errors before submitting');
           return;
         }
 
-        // Validate location
-        // if (!validateLocation(formData.value.location)) {
-        //   notificationStore.error('Invalid location coordinates');
-        //   return;
-        // }
-
         const inspectorData = {
           ...props.modelValue,
           ...formData.value
         };
-
-        // if (props.modelValue?.id) {
-        //   await updateInspector(inspectorData);
-        //   notificationStore.success('Inspector updated successfully');
-        // } else {
-        //   const newInspectorId = await createInspector(inspectorData);
-        //   notificationStore.success('Inspector created successfully');
-        // }
 
         emit('submit', inspectorData);
       } catch (error) {

@@ -100,8 +100,6 @@ export default defineComponent({
 
     // Security monitoring setup
     const { monitor, securityContext } = useSecurityMonitor();
-    // const rateLimiter = (PROFILE_UPDATE_LIMIT, 60000);
-
     // Form validation setup
     const rules = {
       firstName: { required: true, minLength: 2 },
@@ -121,10 +119,6 @@ export default defineComponent({
     // Profile update handler with rate limiting and validation
     const handleProfileUpdate = async (updatedProfile: Partial<IUser>): Promise<boolean> => {
       try {
-        // if (!rateLimiter.tryAcquire()) {
-        //   error.value = 'Too many update attempts. Please try again later.';
-        //   return false;
-        // }
 
         isLoading.value = true;
         error.value = null;
