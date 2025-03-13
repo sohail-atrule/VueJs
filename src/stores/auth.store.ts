@@ -65,41 +65,43 @@ interface AuthState {
     lastError: AuthError | null;
 }
 
+
+const getUserSession = (() => {
+    try {
+        const session = localStorage.getItem("user_session");
+        return session ? JSON.parse(session) : null;
+    } catch (error) {
+        console.error("Failed to parse user session:", error);
+        return null;
+    }
+})();
+
+const getUserToken = (() => {
+    try {
+        const token = localStorage.getItem("auth_token");
+        return token ? JSON.parse(token) : null;
+    } catch (error) {
+        console.error("Failed to parse auth token:", error);
+        return null;
+    }
+})();
+
+const getUserData = getUserSession ? getUserSession.user : null;
+
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
         currentUser: {
-            id: 1,
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john.doe@example.com',
+            id: getUserSession?.user.id,
+            firstName: getUserSession?.user.firstName,
+            lastName: getUserSession?.user.lastName,
+            email: getUserSession?.user.email,
             permissions: ['CreateInspector', 'AssignEquipment', 'ProcessDrugTest'],
             lastLoginAt: new Date().toISOString()
         },
         authenticated: true,
         tokens: null,
         session: null,
-        user: {
-            id: 1,
-            email: 'john.doe@example.com',
-            firstName: 'John',
-            lastName: 'Doe',
-            phoneNumber: null,
-            isActive: true,
-            azureAdB2CId: 'test-id',
-            userRoles: [
-                {
-                    id: 1,
-                    userId: 1,
-                    roleId: 2, // Operations role
-                    assignedAt: new Date(),
-                    revokedAt: null,
-                    name: ""
-                }
-            ],
-            createdAt: new Date(),
-            modifiedAt: null,
-            lastLoginAt: new Date()
-        },
+        user: getUserToken ? getUserData :  null,
         authStatus: AuthStatus.AUTHENTICATED,
         securityEvents: [],
         loginAttempts: [],

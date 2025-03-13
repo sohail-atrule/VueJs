@@ -41,9 +41,7 @@ export interface AuditLogPagination {
  * Statistics about audit logs
  */
 export interface AuditStatistics {
-  actionDistribution: Record<string, number>;
-  entityDistribution: Record<string, number>;
-  timeline: Record<string, number>;
-  topUsers: Array<{ user: string; count: number }>;
-  errorRate: number;
+  actionByTypes: Record<string, number>;
+  entityTypeDistributions: Record<string, number>;
+ 
 }

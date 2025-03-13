@@ -30,11 +30,6 @@ export const useAuditStore = defineStore('audit', () => {
   // Store instance for notifications
   const notificationStore = useNotificationStore();
 
-  // Computed properties
-  const isCacheValid = computed(() => {
-    if (!lastSync.value) return false;
-    return new Date().getTime() - lastSync.value.getTime() < CACHE_DURATION;
-  });
 
   const errorLogs = computed(() => logs.value.filter((log) => log.status === 'error'));
 
@@ -44,25 +39,15 @@ export const useAuditStore = defineStore('audit', () => {
   const fetchLogs = async (
     filters: AuditLogFilters = {},
     pagination: AuditLogPagination = { page: 1, rowsPerPage: 20 },
-    forceRefresh = false
   ) => {
-    if (!forceRefresh && isCacheValid.value) {
-      return { logs: logs.value, total: total.value };
-    }
+  
 
     loading.value = true;
     error.value = null;
-
     try {
       const response = await getAuditLogs(filters, pagination);
       logs.value = response.logs;
       total.value = response.total;
-      lastSync.value = new Date();
-
-      if (forceRefresh) {
-        notificationStore.success('Audit logs updated successfully');
-      }
-
       return response;
     } catch (err: any) {
       error.value = err.message;
@@ -73,23 +58,14 @@ export const useAuditStore = defineStore('audit', () => {
     }
   };
 
-  const fetchStatistics = async (forceRefresh = false) => {
-    if (!forceRefresh && statistics.value && isCacheValid.value) {
-      return statistics.value;
-    }
-
+  const fetchStatistics = async () => {
     loading.value = true;
     error.value = null;
-
     try {
       const stats = await getAuditStatistics();
       statistics.value = stats;
       lastSync.value = new Date();
-
-      if (forceRefresh) {
-        notificationStore.success('Audit statistics updated successfully');
-      }
-
+      console.log("stats:" , stats)
       return stats;
     } catch (err: any) {
       error.value = err.message;
@@ -111,11 +87,9 @@ export const useAuditStore = defineStore('audit', () => {
     statistics,
     loading,
     error,
-    lastSync,
     total,
 
     // Getters
-    isCacheValid,
     errorLogs,
     successLogs,
 

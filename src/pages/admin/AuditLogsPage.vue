@@ -19,7 +19,7 @@
         <div class="col-12 col-md-3">
           <q-select
             v-model="filters.entityType"
-            :options="entityTypes"
+            :options="entityType"
             dense
             outlined
             label="Entity Type"
@@ -30,7 +30,7 @@
         <div class="col-12 col-md-3">
           <q-select
             v-model="filters.action"
-            :options="actionTypes"
+            :options="action"
             dense
             outlined
             label="Action"
@@ -101,9 +101,9 @@
               <q-card>
                 <q-card-section>
                   <div class="text-h6">Actions by Type</div>
-                  <div class="q-pa-md">
+                  <div class="q-pa-md"> 
                     <div
-                      v-for="(count, action) in statistics?.actionDistribution"
+                      v-for="(count, action) in statistics?.actionByTypes"
                       :key="action"
                       class="q-mb-sm"
                     >
@@ -113,7 +113,7 @@
                           <q-linear-progress
                             :value="
                               count /
-                              Math.max(...Object.values(statistics?.actionDistribution || {}))
+                              Math.max(...Object.values(statistics?.actionByTypes || {}))
                             "
                             :color="getActionColor(action)"
                             class="q-mt-sm"
@@ -132,7 +132,7 @@
                   <div class="text-h6">Entity Type Distribution</div>
                   <div class="q-pa-md">
                     <div
-                      v-for="(count, entity) in statistics?.entityDistribution"
+                      v-for="(count, entity) in statistics?.entityTypeDistributions"
                       :key="entity"
                       class="q-mb-sm"
                     >
@@ -142,7 +142,7 @@
                           <q-linear-progress
                             :value="
                               count /
-                              Math.max(...Object.values(statistics?.entityDistribution || {}))
+                              Math.max(...Object.values(statistics?.entityTypeDistributions || {}))
                             "
                             color="primary"
                             class="q-mt-sm"
@@ -216,16 +216,16 @@
       required: true,
       label: 'Timestamp',
       align: 'left' as const,
-      field: 'performedAt',
+      field: 'timestamp',
       sortable: true,
       format: (val: string) => formatDate(val),
     },
     {
-      name: 'entityType',
+      name: 'entityName',
       required: true,
-      label: 'Entity Type',
+      label: 'Entity Name',
       align: 'left' as const,
-      field: 'entityType',
+      field: 'entityName',
       sortable: true,
     },
     {
@@ -241,7 +241,7 @@
       required: true,
       label: 'User',
       align: 'left' as const,
-      field: 'performedBy',
+      field: row => row.user?.email,
       sortable: true,
     },
     {
@@ -269,49 +269,40 @@
   const statistics = computed(() => auditStore.statistics);
 
   const filteredLogs = computed(() => {
-    let filtered = [...logs.value];
+  let filtered = [...logs.value];
+  if (filters.value.search) {
+    const searchTerm = filters.value.search.toLowerCase();
+    filtered = filtered.filter(
+      (log) =>
+        log.entityType.toLowerCase().includes(searchTerm) ||
+        log.action.toLowerCase().includes(searchTerm) ||
+        log.performedBy.toLowerCase().includes(searchTerm)
+    );
+  }
+  return filtered;
+});
 
-    if (filters.value.search) {
-      const searchTerm = filters.value.search.toLowerCase();
-      filtered = filtered.filter(
-        (log) =>
-          log.entityType.toLowerCase().includes(searchTerm) ||
-          log.action.toLowerCase().includes(searchTerm) ||
-          log.performedBy.toLowerCase().includes(searchTerm)
-      );
-    }
 
-    if (filters.value.entityType) {
-      filtered = filtered.filter((log) => log.entityType === filters.value.entityType);
-    }
+  const entityType = ['USER', 'ROLE', 'PERMISSION', 'EQUIPMENT', 'SYSTEM'];
 
-    if (filters.value.action) {
-      filtered = filtered.filter((log) => log.action === filters.value.action);
-    }
+  const action = ['Create', 'Update', 'Delete', 'View', 'Export', 'ogin'];
 
-    return filtered;
+  const handleSearch = async () => {
+  const searchFilters = {
+    search: filters.value.search,
+    entityType: filters.value.entityType || undefined,
+    action: filters.value.action || undefined,
+    startDate: filters.value.startDate || undefined,
+    endDate: filters.value.endDate || undefined,
+  };
+
+  await auditStore.fetchLogs(searchFilters, {
+    page: pagination.value.page,
+    rowsPerPage: pagination.value.rowsPerPage,
   });
 
-  const entityTypes = ['USER', 'ROLE', 'PERMISSION', 'EQUIPMENT', 'SYSTEM'];
-
-  const actionTypes = ['create', 'update', 'delete', 'view', 'export', 'login'];
-
-  // Methods
-  const handleSearch = async () => {
-    const searchFilters = {
-      search: filters.value.search,
-      entityType: filters.value.entityType || undefined,
-      action: filters.value.action || undefined,
-      startDate: filters.value.startDate || undefined,
-      endDate: filters.value.endDate || undefined,
-    };
-
-    await auditStore.fetchLogs(searchFilters, {
-      page: pagination.value.page,
-      rowsPerPage: pagination.value.rowsPerPage,
-    });
-    pagination.value.rowsNumber = total.value;
-  };
+  pagination.value.rowsNumber = total.value;
+};
 
   const handleFilterChange = async () => {
     pagination.value.page = 1;
@@ -353,7 +344,7 @@
     try {
       await handleSearch();
       if (activeTab.value === 'statistics') {
-        await auditStore.fetchStatistics();
+       await auditStore.fetchStatistics();
       }
     } catch (error) {
       console.error('Error initializing audit logs page:', error);
@@ -370,6 +361,7 @@
       await auditStore.fetchStatistics();
     }
   });
+ 
 </script>
 
 <style lang="scss" scoped>

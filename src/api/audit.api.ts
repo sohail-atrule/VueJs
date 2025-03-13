@@ -173,58 +173,35 @@ export class AuditApiClient {
    * @returns Promise resolving to filtered and paginated audit logs
    * @throws {ApiError} If the request fails
    */
-  async getAuditLogs(
-    filters: AuditLogFilters = {},
-    pagination: AuditLogPagination = { page: 1, rowsPerPage: 20 }
-  ): Promise<{ logs: AuditLogEntry[]; total: number }> {
+  
+
+   async  getAuditLogs(
+    filters: AuditLogFilters,
+    pagination: AuditLogPagination
+  ) {
     try {
-      logger.info('Fetching audit logs', { filters, pagination });
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      let filteredLogs = [...dummyAuditLogs];
-
-      // Apply filters
-      if (filters.entityType) {
-        filteredLogs = filteredLogs.filter((log) => log.entityType === filters.entityType);
-      }
-
-      if (filters.action) {
-        filteredLogs = filteredLogs.filter((log) => log.action === filters.action);
-      }
-
-      if (filters.startDate) {
-        const startDate = new Date(filters.startDate);
-        filteredLogs = filteredLogs.filter((log) => log.performedAt >= startDate);
-      }
-
-      if (filters.endDate) {
-        const endDate = new Date(filters.endDate);
-        filteredLogs = filteredLogs.filter((log) => log.performedAt <= endDate);
-      }
-
-      if (filters.search) {
-        const searchTerm = filters.search.toLowerCase();
-        filteredLogs = filteredLogs.filter(
-          (log) =>
-            log.entityType.toLowerCase().includes(searchTerm) ||
-            log.action.toLowerCase().includes(searchTerm) ||
-            log.performedBy.toLowerCase().includes(searchTerm)
-        );
-      }
-
-      // Calculate total before pagination
-      const total = filteredLogs.length;
-
-      // Apply pagination
-      const start = (pagination.page - 1) * pagination.rowsPerPage;
-      const end = start + pagination.rowsPerPage;
-      const logs = filteredLogs.slice(start, end);
-
-      return { logs, total };
+      const queryParams = new URLSearchParams({
+        page: pagination.page.toString(),
+        pageSize: pagination.rowsPerPage.toString(),
+        ...(filters.entityType && { entityType: filters.entityType }),
+        ...(filters.action && { action: filters.action }),
+        ...(filters.startDate && { startDate: filters.startDate.toString() }),
+        ...(filters.endDate && { endDate: filters.endDate.toString() }),
+        ...(filters.search && { search: filters.search }),
+      });
+  
+      const response = await api.get(`/v1/AuditLog?${queryParams}`);
+  
+      return {
+        logs: response.data.auditLog,
+        total: response.data.totalCount,
+        pageNumber: response.data.pageNumber,
+        pageSize: response.data.pageSize,
+        totalPages: response.data.totalPages,
+      };
     } catch (error) {
-      logger.error('Failed to fetch audit logs', { error, filters, pagination });
-      throw createError(500, 'Failed to fetch audit logs', { cause: error });
+      console.error('Error fetching audit logs:', error);
+      throw new Error('Failed to fetch audit logs');
     }
   }
 
@@ -235,56 +212,17 @@ export class AuditApiClient {
    */
   async getAuditStatistics(): Promise<AuditStatistics> {
     try {
-      logger.info('Fetching audit statistics');
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Action type distribution
-      const actionStats = dummyAuditLogs.reduce((acc, log) => {
-        acc[log.action] = (acc[log.action] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Entity type distribution
-      const entityStats = dummyAuditLogs.reduce((acc, log) => {
-        acc[log.entityType] = (acc[log.entityType] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      // Activity timeline (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const timeline = dummyAuditLogs
-        .filter((log) => log.performedAt >= sevenDaysAgo)
-        .reduce((acc, log) => {
-          const date = log.performedAt.toISOString().split('T')[0];
-          acc[date] = (acc[date] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
-
-      // Top users
-      const userCounts = dummyAuditLogs.reduce((acc, log) => {
-        acc[log.performedBy] = (acc[log.performedBy] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-
-      const topUsers = Object.entries(userCounts)
-        .map(([user, count]) => ({ user, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-
-      // Error rate
-      const errorCount = dummyAuditLogs.filter((log) => log.status === 'error').length;
-      const errorRate = (errorCount / dummyAuditLogs.length) * 100;
-
-      return {
-        actionDistribution: actionStats,
-        entityDistribution: entityStats,
-        timeline,
-        topUsers,
-        errorRate,
-      };
+      const queryParams = new URLSearchParams({
+        page: '1',
+        pageSize:  '20',
+        entityType:  '',
+        action:  '',
+        startDate:  '',
+        endDate: '',
+        search: '',
+      });
+      const response = await api.get(`/v1/AuditLog?${queryParams}`);
+      return response.data.statistic;
     } catch (error) {
       logger.error('Failed to fetch audit statistics', { error });
       throw createError(500, 'Failed to fetch audit statistics', { cause: error });
