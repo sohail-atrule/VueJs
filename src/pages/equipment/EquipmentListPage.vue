@@ -84,7 +84,7 @@ export default defineComponent({
     const error = ref<string | null>(null);
 
     // Computed properties
-    // const canCreateEquipment = computed(() => 
+    // const canCreateEquipment = computed(() =>
     //   authStore.hasRole('Admin') || authStore.hasRole('Operations')
     // );
 
@@ -124,7 +124,7 @@ export default defineComponent({
           throw new Error('Equipment ID is missing');
         }
 
-        await router.push({ 
+        await router.push({
           path: `/dashboard/equipment/${equipment.id}`
         });
       } catch (err) {
@@ -162,7 +162,7 @@ export default defineComponent({
 
         // Update URL query params
         await router.replace({ query: { ...filters } });
-        
+
         // Apply filters
         await equipmentStore.loadEquipment(true, filters);
       } catch (err) {
@@ -184,7 +184,7 @@ export default defineComponent({
 
         // Clear URL query params
         await router.replace({ query: {} });
-        
+
         // Reset filters and reload
         await equipmentStore.loadEquipment(true);
       } catch (err) {
@@ -204,7 +204,7 @@ export default defineComponent({
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
         }
-        await router.push({ 
+        await router.push({
           path: `/dashboard/equipment/${equipment.id}`,
           query: { edit: 'true' }
         });
@@ -219,12 +219,12 @@ export default defineComponent({
     };
 
     const handleAssignEquipment = async (equipment: Equipment) => {
-      
+
       try {
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
         }
-        await router.push({ 
+        await router.push({
           path: `/dashboard/equipment/${equipment.id}`,
           query: { assign: 'true' }
         });
@@ -239,12 +239,12 @@ export default defineComponent({
     };
 
     const handleReturnEquipment = async (equipment: Equipment) => {
-      
+
       try {
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
         }
-        await router.push({ 
+        await router.push({
           path: `/dashboard/equipment/${equipment.id}`,
           query: { return: 'true' }
         });
@@ -263,7 +263,7 @@ export default defineComponent({
         if (!equipment || !equipment.id) {
           throw new Error('Invalid equipment data');
         }
-        await router.push({ 
+        await router.push({
           path: `/dashboard/equipment/${equipment.id}`,
           query: { maintenance: 'true' }
         });

@@ -55,9 +55,9 @@ function convertToEquipment(item: any): Equipment {
         model: item.name, // Using name as model
         type: EquipmentType.TestKit, // Default to TestKit for now
         condition: item.condition,
-        status: item.status?.toUpperCase() || 'AVAILABLE',
-        isActive: item.status !== 'retired',
-        isAvailable: item.status === 'available',
+        status: item.isAvailable? 'AVAILABLE':'IN_USE',
+        isActive: item.isActive !== 'retired',
+        isAvailable: item.isAvailable ,
         purchaseDate: new Date(item.purchaseDate),
         lastMaintenanceDate: item.lastMaintenanceDate ? new Date(item.lastMaintenanceDate) : null,
         notes: item.notes,
@@ -163,7 +163,6 @@ export class EquipmentApiClient {
      */
     async createEquipment(equipment: Partial<Equipment>): Promise<Equipment> {
         try {
-
             logger.info('Creating new equipment', { equipment });
             // Create a proper Equipment instance first
             const equipmentInstance = new Equipment(equipment);
@@ -267,7 +266,7 @@ export async function getEquipmentList(filters: Record<string, any>): Promise<Eq
 
         const params = {
             page: filters.page || 1,
-            pageSize: filters.pageSize || 10,
+            pageSize: filters.pageSize || 20,
             startDate: filters.startDate || null,
             endDate: filters.endDate || null,
             isAvailable: filters.availability ?? null,  // Ensure boolean values are passed correctly
@@ -302,7 +301,6 @@ export async function getEquipmentById(id: number): Promise<Equipment> {
 
 export async function createEquipment(equipment: Partial<any>): Promise<Equipment> {
     try {
-
         equipment.createdBy = "Admin";
 
         const response = await api.post(API_ENDPOINTS.EQUIPMENT, equipment);

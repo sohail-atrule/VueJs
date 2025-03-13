@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Pinia store for managing audit logs in the service provider management system.
  * Implements comprehensive audit logging, real-time statistics, caching, and error handling.
@@ -48,6 +49,7 @@ export const useAuditStore = defineStore('audit', () => {
       const response = await getAuditLogs(filters, pagination);
       logs.value = response.logs;
       total.value = response.total;
+
       return response;
     } catch (err: any) {
       error.value = err.message;

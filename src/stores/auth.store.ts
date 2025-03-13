@@ -64,8 +64,6 @@ interface AuthState {
     mfaChallenge: MfaChallenge | null;
     lastError: AuthError | null;
 }
-
-
 const getUserSession = (() => {
     try {
         const session = localStorage.getItem("user_session");
@@ -86,7 +84,7 @@ const getUserToken = (() => {
     }
 })();
 
-const getUserData = getUserSession ? getUserSession.user : null;
+const getUserData = getUserSession ? getUserSession.user : null
 
 export const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({

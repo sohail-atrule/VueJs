@@ -13,7 +13,7 @@ import type { AuthToken } from '../models/auth.model';
 import { AuthStatus, isTokenExpired } from '../models/auth.model';
 
 // Environment configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_VERSION = import.meta.env.VITE_APP_API_VERSION || 'v1';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_APP_API_TIMEOUT || '30000');
 const MAX_RETRY_ATTEMPTS = parseInt(import.meta.env.VITE_APP_API_RETRY_ATTEMPTS || '3');
@@ -71,25 +71,31 @@ const createApiInstance = (): AxiosInstance => {
                 baseURL: config.baseURL,
                 headers: config.headers
             });
-            if (currentAuthToken && isTokenExpired(currentAuthToken)) {
-                const newToken = await refreshAuthToken(currentAuthToken);
-                currentAuthToken = newToken;
+
+         // Retrieve token from localStorage
+        const storedToken = localStorage.getItem('auth_token');
+        if (storedToken) {
+            try {
+                const { accessToken } = JSON.parse(storedToken);
+                if (accessToken) {
+                    config.headers.Authorization = `Bearer ${accessToken}`;
+                }
+            } catch (error) {
+                console.error('[API Error] Failed to parse token from localStorage:', error);
             }
+        }
 
-            if (currentAuthToken) {
-                config.headers.Authorization = `Bearer ${currentAuthToken.accessToken}`;
-            }
+           // Check if the currentAuthToken is expired and refresh if necessary
+        if (currentAuthToken && isTokenExpired(currentAuthToken)) {
+            const newToken = await refreshAuthToken(currentAuthToken);
+            currentAuthToken = newToken;
+            config.headers.Authorization = `Bearer ${newToken.accessToken}`;
+        }
 
-            // Skip encryption for now since backend doesn't support it
-            // if (config.data) {
-            //     config.headers['X-Request-Signature'] = sign(JSON.stringify(config.data));
-            //     config.data = encrypt(config.data);
-            // }
-
-            return config;
-        },
-        (error) => Promise.reject(error)
-    );
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
     // Response interceptor for error handling and decryption
     rateLimitedInstance.interceptors.response.use(

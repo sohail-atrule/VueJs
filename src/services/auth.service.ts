@@ -43,8 +43,10 @@ const ROLE_ID_MAP = {
 
 export async function performAzureAuth(credentials: LoginCredentials): Promise<AuthResponse> {
 
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
     try {
-      const response = await api.post('/v1/auth/login', credentials);
+      const response = await axios.post(`${API_BASE_URL}/v1/auth/login`, credentials);
 
       const { id, firstName, lastName, userRoles } = response.data.user;
 

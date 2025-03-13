@@ -203,7 +203,7 @@
 
   const pagination = ref({
     page: 1,
-    rowsPerPage: 20,
+    rowsPerPage: 10,
     sortBy: 'performedAt',
     descending: true,
     rowsNumber: 0,
@@ -361,7 +361,6 @@
       await auditStore.fetchStatistics();
     }
   });
- 
 </script>
 
 <style lang="scss" scoped>

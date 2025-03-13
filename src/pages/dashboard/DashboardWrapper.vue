@@ -12,6 +12,7 @@
   import { useAuth } from '@/composables/useAuth';
   import DashboardPage from './DashboardPage.vue';
   import AdminDashboardPage from '../admin/AdminDashboardPage.vue';
+  import OperationalDashboardPage from '../dashboard/OperationalDashboard.vue';
   import { UserRoleType, getRoleId } from '@/models/user.model';
 
   const { currentUser } = useAuth();

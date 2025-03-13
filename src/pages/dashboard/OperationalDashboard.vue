@@ -6,13 +6,13 @@
         <div class="welcome-section q-mb-lg">
           <div class="text-h4 text-weight-bold q-mb-sm">Operations Dashboard</div>
           <div class="text-subtitle1 text-grey-7">
-            Last sync: {{ new Date(lastSyncTime).toLocaleString() }}
+            <!-- Last sync: {{ new Date(lastSyncTime).toLocaleString() }} -->
           </div>
         </div>
       </div>
 
       <!-- Equipment Statistics -->
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Available Equipment</div>
@@ -25,7 +25,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Assigned Equipment</div>
@@ -38,7 +38,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <!-- <div class="col-12 col-sm-6 col-md-3">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Maintenance Required</div>
@@ -50,8 +50,7 @@
           </q-card-section>
         </q-card>
       </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
+       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Available Inspectors</div>
@@ -62,28 +61,28 @@
             <div class="text-caption text-grey-8">Ready for Assignment</div>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Quick Actions -->
       <div class="col-12 col-md-4">
         <q-card class="dashboard-card">
           <q-card-section>
-            <div class="text-h6">Quick Actions</div>
+            <div class="text-h6">Quick Actions Tab</div>
           </q-card-section>
           <q-list padding>
-            <q-item clickable v-ripple @click="navigateTo('/equipment/new')">
+            <q-item clickable v-ripple @click="navigateTo('/dashboard/equipment/create')">
               <q-item-section avatar>
                 <q-icon name="add_circle" color="primary" />
               </q-item-section>
               <q-item-section>Add New Equipment</q-item-section>
             </q-item>
-            <q-item clickable v-ripple @click="navigateTo('/equipment')">
+            <q-item clickable v-ripple @click="navigateTo('/dashboard/equipment')">
               <q-item-section avatar>
                 <q-icon name="assignment" color="primary" />
               </q-item-section>
               <q-item-section>Manage Equipment</q-item-section>
             </q-item>
-            <q-item clickable v-ripple @click="navigateTo('/inspectors')">
+            <q-item clickable v-ripple @click="navigateTo('/dashboard/inspectors')">
               <q-item-section avatar>
                 <q-icon name="people" color="primary" />
               </q-item-section>
@@ -189,7 +188,7 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const $q = useQuasar();
-    const { 
+    const {
       equipment,
       availableEquipment,
       assignedEquipment,
@@ -202,7 +201,7 @@ export default defineComponent({
     const availableEquipmentCount = computed(() => availableEquipment.value.length);
     const assignedEquipmentCount = computed(() => assignedEquipment.value.length);
     const maintenanceRequiredCount = computed(() => maintenanceRequired.value.length);
-    const availableInspectorsCount = computed(() => 
+    const availableInspectorsCount = computed(() =>
       inspectorStore.inspectorsByStatus['Available'].length
     );
 
@@ -368,7 +367,7 @@ export default defineComponent({
 
 .q-table {
   border-radius: 8px;
-  
+
   ::v-deep thead tr th {
     font-weight: 600;
     color: var(--q-primary);
@@ -390,4 +389,4 @@ export default defineComponent({
     }
   }
 }
-</style> 
+</style>
