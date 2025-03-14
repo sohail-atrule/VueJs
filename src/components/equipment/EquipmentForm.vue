@@ -270,15 +270,13 @@ export default defineComponent({
           isAvailable: true
         };
 
-        console.log("equipmentData:" , equipmentData);
-
         if (props.equipment) {
           await equipmentStore.updateExistingEquipment(props.equipment.id, equipmentData);
-          showSuccessNotification('Equipment updated successfully');
-        } else {
-          await equipmentStore.createNewEquipment(equipmentData);
-          showSuccessNotification('Equipment created successfully');
-        }
+        } 
+        
+        // else {
+        //   await equipmentStore.createNewEquipment(equipmentData);
+        // }
 
         emit('save', equipmentData);
       } catch (error) {

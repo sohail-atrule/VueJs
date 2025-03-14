@@ -31,11 +31,21 @@ export type {
     EquipmentStatusValue
 };
 
+export enum EquipmentTypeEnum {
+    Laptop = 0,
+    Mobile = 1,
+    Tablet = 2,
+    TestKit = 3,
+    SafetyGear = 4,
+    InspectionTool = 5
+}
+
+
 export class Equipment implements IEquipmentData {
     id: number = 0;
     serialNumber: string = '';
     model: string = '';
-    type: EquipmentTypeValue = EquipmentType.Laptop;
+    type: string = '';
     condition: string = '';
     status: EquipmentStatusValue = EquipmentStatus.AVAILABLE;
     isActive: boolean = true;

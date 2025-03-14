@@ -53,7 +53,7 @@ function convertToEquipment(item: any): Equipment {
         id: Number(item.id),
         serialNumber: item.serialNumber,
         model: item.model, // Using name as model
-        type: EquipmentType.TestKit, // Default to TestKit for now
+        type: item.type, // Default to TestKit for now
         condition: item.condition,
         status: item.isAvailable? 'AVAILABLE':'IN_USE',
         isActive: item.isActive !== 'retired',

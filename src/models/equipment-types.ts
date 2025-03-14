@@ -149,7 +149,7 @@ export interface IEquipmentData {
     id: number;
     serialNumber: string;
     model: string;
-    type: EquipmentTypeValue;
+    type: string;
     condition: string;
     status: EquipmentStatusValue;
     isActive: boolean;

@@ -54,19 +54,21 @@ export default defineComponent({
   setup() {
     const router = useRouter();
     const equipmentStore = useEquipmentStore();
-    const { showSuccessNotification, showErrorNotification } = useNotification();
+    const { showErrorNotification } = useNotification();
 
     const loading = ref(false);
     const error = ref<string | null>(null);
+
 
     const handleSave = async (equipmentData: Partial<any>) => {
       try {
         loading.value = true;
         error.value = null;
-       console.log("equipmentData:" , equipmentData);
-        await equipmentStore.createNewEquipment(equipmentData);
-        showSuccessNotification('Equipment created successfully');
-        await router.push({ name: 'equipment-list' });
+       await equipmentStore.createNewEquipment(equipmentData);
+        setTimeout(async()=>{
+          await router.push({ name: 'equipment-list' });
+        },  1000)
+       
       } catch (err) {
         error.value = err instanceof Error ? err.message : 'Failed to create equipment';
         showErrorNotification(error.value);

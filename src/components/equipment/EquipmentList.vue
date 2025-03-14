@@ -92,25 +92,24 @@
       {{ error }}
     </div>
 
-    <!-- Loading State -->
-    <q-inner-loading :showing="loading">
-      <q-spinner size="50px" color="primary" />
-    </q-inner-loading>
   </div>
 </template>
 
+
+
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue';
-import { QBtn, QSpinner, QChip, QBtnGroup, QInnerLoading, useQuasar } from 'quasar';
+import { QBtn, QSpinner, QChip, QBtnGroup, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import SearchBar from '../common/SearchBar.vue';
 import { useEquipmentStore } from '@/stores/equipment.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { UserRoleType } from '@/models/user.model';
-import { Equipment, EquipmentType } from '@/models/equipment.model';
+import { Equipment, EquipmentTypeEnum } from '@/models/equipment.model';
 import { formatDate } from '@/utils/date.util';
 import { useRouter } from 'vue-router';
 import { EquipmentStatus } from '@/models/equipment.model';
+import type { EquipmentTypeValue } from '@/models';
 // Initialize composables
 const $q = useQuasar();
 const { t } = useI18n();
@@ -172,6 +171,14 @@ const tableColumns = computed(() => [
   }
 ]);
 
+
+const getEquipmentTypeName = (type: number): string => {
+  return EquipmentTypeEnum[type] ?? 'Laptop';
+};
+
+
+
+
 // Filtered equipment list - only search filter remains here
 const filteredEquipment = computed(() => {
   try {
@@ -190,9 +197,9 @@ const filteredEquipment = computed(() => {
           id: item.id,
           serialNumber: item.serialNumber,
           model:  item.model, // item.name ?? Handle both backend and frontend model names
-          type: item.type,
+          type: getEquipmentTypeName(Number(item.type)),
           condition: item.condition,
-          // status: item.status?.toUpperCase(),
+          status: item.isAvailable?'AVAILABLE':'IN_USE',
           isActive: item.status !== EquipmentStatus.RETIRED,
           isAvailable: item.status === EquipmentStatus.AVAILABLE,
           purchaseDate: item.purchaseDate ? new Date(item.purchaseDate) : new Date(),
@@ -280,6 +287,7 @@ const handleMaintenanceEquipment = (equipment: Equipment) => {
 
 // Status color mapping
 const getStatusColor = (status: string) => {
+  debugger;
   switch (status?.toUpperCase()) {
     case 'AVAILABLE':
       return 'positive';

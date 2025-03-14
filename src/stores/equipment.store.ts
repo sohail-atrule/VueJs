@@ -19,6 +19,7 @@ import {
   equipmentMaintenance
 } from '../api/equipment.api';
 import { useNotificationStore } from './notification.store';
+import { useRouter } from 'vue-router';
 
 // Constants for store configuration
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
@@ -48,6 +49,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
   const lastSync = ref<Date | null>(null);
   const cache = ref<{ [key: string]: Equipment }>({});
   const retryCount = ref(0);
+  const router = useRouter();
 
   // Store instance for notifications
   const notificationStore = useNotificationStore();
@@ -153,12 +155,9 @@ export const useEquipmentStore = defineStore('equipment', () => {
     }
   };
 
-   let isSaving = false;
 
   const createNewEquipment = async (equipmentData: Omit<any, 'id'>) => {
 
-    if (isSaving) return;
-      isSaving = true;
 
     loading.value = true;
     error.value = null;
@@ -166,8 +165,11 @@ export const useEquipmentStore = defineStore('equipment', () => {
     try {
 
       const response = await createEquipment(equipmentData);
-      notificationStore.success('Equipment created successfully');
-      return response;
+      if(response){
+        notificationStore.success('Equipment created successfully');
+        await router.push({ name: 'equipment-list' });
+        return response;
+      }
     } catch (err) {
       error.value = err.message;
       notificationStore.error(`Failed to create equipment: ${err.message}`);
