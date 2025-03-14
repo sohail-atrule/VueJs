@@ -270,6 +270,8 @@ export default defineComponent({
           isAvailable: true
         };
 
+        console.log("equipmentData:" , equipmentData);
+
         if (props.equipment) {
           await equipmentStore.updateExistingEquipment(props.equipment.id, equipmentData);
           showSuccessNotification('Equipment updated successfully');

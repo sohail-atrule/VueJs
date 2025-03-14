@@ -6,13 +6,13 @@
         <div class="welcome-section q-mb-lg">
           <div class="text-h4 text-weight-bold q-mb-sm">Welcome back, {{ userName }}</div>
           <div class="text-subtitle1 text-grey-7">
-            Last login: {{ new Date(lastLogin).toLocaleString() }}
+            <!-- Last login: {{ new Date(lastLogin).toLocaleString() }} -->
           </div>
         </div>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Equipment</div>
@@ -25,7 +25,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Inspectors</div>
@@ -37,7 +37,7 @@
           </q-card-section>
         </q-card>
       </div>
-
+      <!--
       <div class="col-12 col-sm-6 col-md-3">
         <q-card class="dashboard-card">
           <q-card-section>
@@ -62,7 +62,7 @@
             <div class="text-caption text-grey-8">5 Active Now</div>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Quick Actions -->
       <div class="col-12 col-md-4">
@@ -106,7 +106,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ activity.title }}</q-item-label>
-                <q-item-label caption>{{ activity.timestamp }}</q-item-label>
+                <q-item-label caption>{{ activity.timestamp }} hours ago</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -119,47 +119,52 @@
 <script lang="ts" setup>
   import { ref, onMounted, computed } from 'vue';
   import { useAuth } from '@/composables/useAuth';
+  import { useDashboard } from '@/composables/useDashboard';
 
   const { currentUser } = useAuth();
+  const { dashboardValues,fetchData } = useDashboard();
 
   const userName = computed(() => currentUser.value?.firstName || 'User');
   const lastLogin = ref(currentUser.value?.lastLoginAt || new Date());
-  const equipmentCount = ref(2);
-  const availableEquipment = ref('1 Available');
-  const inspectorsCount = ref(2);
-  const mobilizedInspectors = ref('1 Mobilized');
+  const equipmentCount = computed(() => dashboardValues.value?.dashboard?.equipment || 0);
+  const availableEquipment = computed(() => dashboardValues.value?.dashboard?.availableEquipment || 0);
+  const inspectorsCount = computed(() => dashboardValues.value?.dashboard?.inspector || 0);
+  const mobilizedInspectors = computed(() => dashboardValues.value?.dashboard?.mobilizedInspector || 0);
+  const recentActivities = computed(() => dashboardValues.value?.recentActivityLog || []);
 
-  const recentActivities = ref([
-    {
-      id: 1,
-      icon: 'engineering',
-      color: 'green',
-      title: 'Inspector Mike assigned to Project A',
-      timestamp: '2 hours ago',
-    },
-    {
-      id: 2,
-      icon: 'construction',
-      color: 'orange',
-      title: 'Equipment #123 maintenance completed',
-      timestamp: '4 hours ago',
-    },
-    {
-      id: 3,
-      icon: 'work',
-      color: 'blue',
-      title: 'New project "Site B Development" created',
-      timestamp: '1 day ago',
-    },
-    {
-      id: 4,
-      icon: 'person',
-      color: 'purple',
-      title: 'Contractor evaluation submitted',
-      timestamp: '2 days ago',
-    },
-  ]);
+
 </script>
+  <!-- // ref([
+  //   {
+  //     id: 1,
+  //     icon: 'engineering',
+  //     color: 'green',
+  //     title: 'Inspector Mike assigned to Project A',
+  //     timestamp: '2 hours ago',
+  //   },
+  //   {
+  //     id: 2,
+  //     icon: 'construction',
+  //     color: 'orange',
+  //     title: 'Equipment #123 maintenance completed',
+  //     timestamp: '4 hours ago',
+  //   },
+  //   {
+  //     id: 3,
+  //     icon: 'work',
+  //     color: 'blue',
+  //     title: 'New project "Site B Development" created',
+  //     timestamp: '1 day ago',
+  //   },
+  //   {
+  //     id: 4,
+  //     icon: 'person',
+  //     color: 'purple',
+  //     title: 'Contractor evaluation submitted',
+  //     timestamp: '2 days ago',
+  //   },
+  // ]); -->
+
 
 <style lang="scss" scoped>
   .dashboard-card {

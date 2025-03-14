@@ -63,7 +63,7 @@ export default defineComponent({
       try {
         loading.value = true;
         error.value = null;
-
+       console.log("equipmentData:" , equipmentData);
         await equipmentStore.createNewEquipment(equipmentData);
         showSuccessNotification('Equipment created successfully');
         await router.push({ name: 'equipment-list' });

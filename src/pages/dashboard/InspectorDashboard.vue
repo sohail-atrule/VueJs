@@ -19,7 +19,7 @@
       </div>
 
       <!-- Status Cards -->
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Assigned Equipment</div>
@@ -32,7 +32,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Next Drug Test</div>
@@ -45,7 +45,7 @@
         </q-card>
       </div>
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <!-- <div class="col-12 col-sm-6 col-md-3">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Active Certifications</div>
@@ -56,9 +56,9 @@
             <div class="text-caption text-grey-8">Valid Certifications</div>
           </q-card-section>
         </q-card>
-      </div>
+      </div> -->
 
-      <div class="col-12 col-sm-6 col-md-3">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-card class="dashboard-card" v-if="lastMobilizedDate">
           <q-card-section>
             <div class="text-grey-8 text-subtitle1">Last Mobilized</div>
@@ -102,7 +102,7 @@
       </div>
 
       <!-- Certifications Section -->
-      <div class="col-12 col-md-6">
+      <!-- <div class="col-12 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-h6">Certifications</div>
@@ -129,10 +129,10 @@
             </template>
           </q-table>
         </q-card>
-      </div>
+      </div> -->
 
       <!-- Recent Activity -->
-      <div class="col-12">
+      <div class="col-12 col-md-6">
         <q-card class="dashboard-card">
           <q-card-section>
             <div class="text-h6">Recent Activity</div>
@@ -159,6 +159,8 @@ import { defineComponent, ref, computed } from 'vue';
 import { useInspectorStore } from '@/stores/inspector.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { InspectorStatus } from '@/models/inspector.model';
+import { useDashboard } from '@/composables/useDashboard';
+
 
 export default defineComponent({
   name: 'InspectorDashboard',
@@ -166,32 +168,34 @@ export default defineComponent({
   setup() {
     const inspectorStore = useInspectorStore();
     const authStore = useAuthStore();
+    const { inspectorDashboardValue,fetchInspectorData } = useDashboard();
 
     // Mock data - replace with actual API calls
     const inspectorName = ref(authStore.currentUser?.firstName || 'Inspector');
     const badgeNumber = ref('B12345');
     const currentStatus = ref(InspectorStatus.Available);
-    const lastMobilizedDate = ref(new Date('2024-02-15'));
-    const assignedEquipmentCount = ref(3);
+    const lastMobilizedDate = computed(() => inspectorDashboardValue.value?.dashboard?.lastMobiledDate || new Date());//ref(new Date('2024-02-15'));
+    const assignedEquipmentCount = computed(() => inspectorDashboardValue.value?.dashboard?.assignedEquipment || 0);
     const activeCertificationsCount = ref(2);
 
     // Equipment table configuration
-    const assignedEquipment = ref([
-      {
-        id: 1,
-        serialNumber: 'EQ-001',
-        type: 'Testing Kit',
-        status: 'IN_USE',
-        assignedDate: '2024-02-01'
-      },
-      {
-        id: 2,
-        serialNumber: 'EQ-002',
-        type: 'Tablet',
-        status: 'IN_USE',
-        assignedDate: '2024-02-10'
-      }
-    ]);
+    const assignedEquipment = computed(() => inspectorDashboardValue.value?.equipmentList || []);
+    // ref([
+    //   {
+    //     id: 1,
+    //     serialNumber: 'EQ-001',
+    //     type: 'Testing Kit',
+    //     status: 'IN_USE',
+    //     assignedDate: '2024-02-01'
+    //   },
+    //   {
+    //     id: 2,
+    //     serialNumber: 'EQ-002',
+    //     type: 'Tablet',
+    //     status: 'IN_USE',
+    //     assignedDate: '2024-02-10'
+    //   }
+    // ]);
 
     const equipmentColumns = [
       { name: 'serialNumber', label: 'Serial Number', field: 'serialNumber', sortable: true },
@@ -226,29 +230,31 @@ export default defineComponent({
     ];
 
     // Recent activities
-    const recentActivities = ref([
-      {
-        id: 1,
-        icon: 'construction',
-        color: 'primary',
-        title: 'Equipment EQ-001 assigned',
-        timestamp: '2 hours ago'
-      },
-      {
-        id: 2,
-        icon: 'science',
-        color: 'positive',
-        title: 'Drug test completed',
-        timestamp: '2 days ago'
-      },
-      {
-        id: 3,
-        icon: 'verified',
-        color: 'secondary',
-        title: 'API Level 2 certification renewed',
-        timestamp: '1 week ago'
-      }
-    ]);
+    const recentActivities = computed(() => inspectorDashboardValue.value?.recentActivityLog || []);
+
+    // ref([
+    //   {
+    //     id: 1,
+    //     icon: 'construction',
+    //     color: 'primary',
+    //     title: 'Equipment EQ-001 assigned',
+    //     timestamp: '2 hours ago'
+    //   },
+    //   {
+    //     id: 2,
+    //     icon: 'science',
+    //     color: 'positive',
+    //     title: 'Drug test completed',
+    //     timestamp: '2 days ago'
+    //   },
+    //   {
+    //     id: 3,
+    //     icon: 'verified',
+    //     color: 'secondary',
+    //     title: 'API Level 2 certification renewed',
+    //     timestamp: '1 week ago'
+    //   }
+    // ]);
 
     // Computed properties
     const statusColor = computed(() => {
@@ -266,7 +272,14 @@ export default defineComponent({
 
     const daysUntilNextDrugTest = computed(() => {
       // Mock calculation - replace with actual logic
-      return 45;
+      if(inspectorDashboardValue.value?.dashboard?.lastDrugTest != ""){
+        const lastDrugTestDate = new Date(inspectorDashboardValue.value?.dashboard?.lastDrugTest);
+        const futureDate= lastDrugTestDate.setDate(lastDrugTestDate.getDate() + 45);
+        const today = new Date();
+        return Math.floor((futureDate - today.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      return  inspectorDashboardValue.value?.dashboard?.lastDrugTest == "" ? 'N/A':inspectorDashboardValue.value?.dashboard?.lastDrugTest
     });
 
     const drugTestColor = computed(() => {
@@ -281,12 +294,13 @@ export default defineComponent({
       return date.toLocaleDateString();
     };
 
-    const getEquipmentStatusColor = (status: string) => {
-      switch (status.toUpperCase()) {
+    const getEquipmentStatusColor = (active: string) => {
+      switch (active) {
         case 'IN_USE':
           return 'primary';
         case 'MAINTENANCE':
           return 'warning';
+
         default:
           return 'grey';
       }
@@ -370,4 +384,4 @@ export default defineComponent({
 .text-subtitle1 {
   font-weight: 500;
 }
-</style> 
+</style>

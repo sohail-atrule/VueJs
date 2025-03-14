@@ -15,7 +15,8 @@ import {
   updateEquipment,
   assignEquipment,
   returnEquipment,
-  getEquipmentHistory
+  getEquipmentHistory,
+  equipmentMaintenance
 } from '../api/equipment.api';
 import { useNotificationStore } from './notification.store';
 
@@ -91,7 +92,16 @@ export const useEquipmentStore = defineStore('equipment', () => {
     error.value = null;
 
     try {
-      const response = await getEquipmentList(filters);
+
+
+
+      const response = await getEquipmentList({
+        searchTerm: filters.searchTerm || '', 
+        ...filters
+      });
+
+
+        await getEquipmentList(filters);
       equipment.value = response.map(item => {
         try {
           return Equipment.fromJSON({
@@ -243,6 +253,27 @@ export const useEquipmentStore = defineStore('equipment', () => {
       loading.value = false;
     }
   };
+ 
+  const processEquipmentMaintenance = async (
+    equipmentId: number,
+    equipmentDetails: { maintenanceType: string; technician: string; notes?: string; equipmentId: number; maintenanceDate: Date }
+  ) => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await equipmentMaintenance(equipmentId, equipmentDetails);
+      notificationStore.success('Equipment Maintenance processed successfully');
+      return response;
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      error.value = errorMessage;
+      notificationStore.error(`Failed to process equipment Maintenance: ${errorMessage}`);
+      throw error;
+    } finally {
+      loading.value = false;
+    }
+  };
 
   const loadEquipmentHistory = async (equipmentId: number) => {
     loading.value = true;
@@ -358,6 +389,7 @@ export const useEquipmentStore = defineStore('equipment', () => {
 
     // Actions
     loadEquipment,
+    processEquipmentMaintenance,
     selectEquipment,
     createNewEquipment,
     updateExistingEquipment,

@@ -105,7 +105,7 @@
                 <q-icon :name="activity.icon" :color="activity.color" />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ activity.description }}</q-item-label>
+                <q-item-label>{{ activity.title }}</q-item-label>
                 <q-item-label caption>{{ formatDate(activity.timestamp) }}</q-item-label>
               </q-item-section>
               <q-item-section side>
@@ -179,6 +179,7 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useEquipment } from '@/composables/useEquipment';
+import { useDashboard } from '@/composables/useDashboard';
 import { useInspectorStore } from '@/stores/inspector.store';
 import { formatDate } from '@/utils/date.util';
 
@@ -196,34 +197,34 @@ export default defineComponent({
       lastUpdateTime
     } = useEquipment();
     const inspectorStore = useInspectorStore();
-
-    // Computed values for statistics
-    const availableEquipmentCount = computed(() => availableEquipment.value.length);
-    const assignedEquipmentCount = computed(() => assignedEquipment.value.length);
-    const maintenanceRequiredCount = computed(() => maintenanceRequired.value.length);
+    const { operationalDashboardValues,fetchOperationalData } = useDashboard();
+     // Computed values for statistics
+    const availableEquipmentCount = computed(() => operationalDashboardValues.value?.dashboard?.equipment || 0);
+    const assignedEquipmentCount = computed(() => operationalDashboardValues.value?.dashboard?.assignedEquipment || 0);
+     const maintenanceRequiredCount = computed(() => maintenanceRequired.value.length);
     const availableInspectorsCount = computed(() =>
       inspectorStore.inspectorsByStatus['Available'].length
     );
 
     // Recent activity tracking
-    const recentEquipmentActivity = ref([
-      {
-        id: 1,
-        equipmentId: 1,
-        icon: 'assignment_turned_in',
-        color: 'positive',
-        description: 'Test Kit Pro assigned to Inspector John',
-        timestamp: new Date()
-      },
-      {
-        id: 2,
-        equipmentId: 2,
-        icon: 'build',
-        color: 'warning',
-        description: 'Inspector Tablet scheduled for maintenance',
-        timestamp: new Date(Date.now() - 86400000)
-      }
-    ]);
+    const recentEquipmentActivity = computed(() => operationalDashboardValues.value?.recentActivityLog || []);
+    //   {
+    //     id: 1,
+    //     equipmentId: 1,
+    //     icon: 'assignment_turned_in',
+    //     color: 'positive',
+    //     description: 'Test Kit Pro assigned to Inspector John',
+    //     timestamp: new Date()
+    //   },
+    //   {
+    //     id: 2,
+    //     equipmentId: 2,
+    //     icon: 'build',
+    //     color: 'warning',
+    //     description: 'Inspector Tablet scheduled for maintenance',
+    //     timestamp: new Date(Date.now() - 86400000)
+    //   }
+    // ]);
 
     // Maintenance schedule
     const maintenanceColumns = [

@@ -1,13 +1,11 @@
 <template>
   <div class="inspector-create-page q-pa-md">
     <!-- Page Title -->
-    <h3>Create Inspector</h3>
+    <h3>{{ isEditMode ? 'Edit Inspector' : 'Create Inspector' }}</h3>
 
     <QCard class="inspector-form q-mt-md">
       <QCardSection>
         <QForm @submit.prevent="handleSubmit" class="q-gutter-md">
-
-
           <!-- BADGE NUMBER -->
           <QInput
             v-model="formData.badgeNumber"
@@ -58,43 +56,64 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
-import axios from 'axios';
-
-// If you'd like to use your Pinia store:
-import { useInspectorStore } from '@/stores/inspector.store';
-import router from '@/router';
+import { useRoute, useRouter } from 'vue-router';
 import api from '@/utils/api.util';
-// or import { createInspector } from '@/api/inspector.api';
-const inspectorStore = useInspectorStore();
 
 const $q = useQuasar();
+const route = useRoute();
+const router = useRouter();
 const loading = ref(false);
+
+// Check if the component is in edit mode
+const isEditMode = computed(() => route.path.includes('/inspectors/edit'));
 
 /**
  * Data Model
- * Match the shape of the .NET command:
- * {
- *   "UserId": 1,
- *   "BadgeNumber": "BN120",
- *   "Location": {
- *     "type": "Point",
- *     "coordinates": [long, lat]
- *   }
- * }
  */
-const formData = ref({
-  userId: 1,             // Example default
-  badgeNumber: '',       // Start empty
-  latitude: '',      // Example default
-  longitude: ''    // Example default
+const formData = ref({           
+  id: 0,             
+  badgeNumber: '',      
+  latitude: '',   
+  longitude: ''   
 });
 
 /**
+ * Check if the component is in edit mode
+ * and fetch the inspector data if it is.
+ */
+onMounted(async () => {
+  if (isEditMode.value && route.query.inspectorId) {
+    await fetchInspectorData(route.query.inspectorId as string);
+  }
+});
+
+/**
+ * Fetch Inspector Data for Edit
+ */
+async function fetchInspectorData(id: string) {
+  try {
+    loading.value = true;
+    const response = await api.get(`/v1/Inspectors/${id}`);
+    const inspector = response.data;
+    formData.value.id = inspector.id;
+    // Populate the form fields
+    formData.value.badgeNumber = inspector.badgeNumber;
+    formData.value.latitude = inspector.location.coordinates[1]; // Latitude
+    formData.value.longitude = inspector.location.coordinates[0]; // Longitude
+  } catch (error: any) {
+    $q.notify({
+      type: 'negative',
+      message: 'Failed to fetch inspector data'
+    });
+  } finally {
+    loading.value = false;
+  }
+}
+
+/**
  * Handle Form Submission
- * Builds the JSON exactly as your cURL & .NET controller expects
- * and posts to 'https://192.168.1.28:7031/api/v1/Inspectors'.
  */
 async function handleSubmit() {
   try {
@@ -102,7 +121,7 @@ async function handleSubmit() {
 
     // Construct the JSON payload
     const payload = {
-      UserId: formData.value.userId,
+      Id: formData.value.id,
       BadgeNumber: formData.value.badgeNumber,
       Location: {
         type: 'Point',
@@ -114,25 +133,33 @@ async function handleSubmit() {
       }
     };
 
-    // Perform the POST request directly via axios
-    // (You could also call your createInspector(...) API method if you adapt it)
+    if (isEditMode.value && route.query.inspectorId) {
+      // Update existing inspector
+      await api.put(`/v1/Inspectors/${route.query.inspectorId}`, payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    await api.post(
-      '/v1/Inspectors',
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
-    );
+      $q.notify({
+        type: 'positive',
+        message: 'Inspector updated successfully'
+      });
+    } else {
+      // Create new inspector
+      await api.post('/v1/Inspectors', payload, {
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-    // Success notification
-    $q.notify({
-      type: 'positive',
-      message: 'Inspector created successfully'
-    });
-    router.push('/dashboard/inspectors')
+      $q.notify({
+        type: 'positive',
+        message: 'Inspector created successfully'
+      });
+    }
 
+    // Redirect to the inspector list page
+    router.push('/dashboard/inspectors');
   } catch (error: any) {
     // Show a more detailed error if available
-    const errorMessage = error?.response?.data?.error || 'Error creating inspector';
+    const errorMessage = error?.response?.data?.error || 'Error saving inspector';
     $q.notify({
       type: 'negative',
       message: errorMessage

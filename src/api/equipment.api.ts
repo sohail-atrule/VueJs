@@ -52,7 +52,7 @@ function convertToEquipment(item: any): Equipment {
     return new Equipment({
         id: Number(item.id),
         serialNumber: item.serialNumber,
-        model: item.name, // Using name as model
+        model: item.model, // Using name as model
         type: EquipmentType.TestKit, // Default to TestKit for now
         condition: item.condition,
         status: item.isAvailable? 'AVAILABLE':'IN_USE',
@@ -87,7 +87,7 @@ function convertToEquipment(item: any): Equipment {
 function convertToIEquipment(item: Equipment): any {
     return {
         id: String(item.id || 0),
-        name: item.model,
+        model: item.model,
         type: item.type,
         serialNumber: item.serialNumber,
         status: (item.status || 'available').toLowerCase(),
@@ -340,6 +340,16 @@ export async function returnEquipment(equipmentId: number, returnDetails: any): 
     } catch (error) {
         logger.error('Failed to return equipment', { error, equipmentId });
         throw createError(400, 'Failed to return equipment', { cause: error });
+    }
+}
+
+export async function equipmentMaintenance(equipmentId: number, equipmentDetails: any): Promise<void> {
+    try {
+        logger.info('Processing equipment maintenance', { equipmentId });
+        await api.put(`/v1/equipment/${equipmentId}/maintenance`, equipmentDetails);
+    } catch (error) {
+        logger.error('Failed to maintenance equipment', { error, equipmentId });
+        throw createError(400, 'Failed to process equipment maintenance', { cause: error });
     }
 }
 

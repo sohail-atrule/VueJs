@@ -78,7 +78,6 @@
             <div class="row q-gutter-sm justify-end">
               <!-- "View" Button (Icon on the left) -->
               <QBtn
-                disable
                 flat
                 round
                 dense
@@ -341,10 +340,10 @@
     };
 
   const handleViewEditInspector = (inspector?: Inspector) => {
-  //router.push({ name: 'inspector-create', query: { inspectorId: inspector?.id } });
+  router.push({ name: 'inspector-edit', query: { inspectorId: inspector?.id } });
 };
   const handleViewCreateInspector = (event: Event) => {
-  router.push({ name: 'inspector-edit' });
+  router.push({ name: 'inspector-create' });
 };
 
   const handleMobilize = async (inspector: Inspector) => {
@@ -358,7 +357,7 @@
 
     await loadInitialData();
   } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Failed to mobilize inspector';
+    const errorMessage = error?.response?.data?.error || error?.response?.data?.message || 'Failed to mobilize inspector';
     showError(errorMessage);
     console.error('Mobilization error:', error);
   }

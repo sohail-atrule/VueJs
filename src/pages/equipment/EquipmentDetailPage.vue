@@ -5,7 +5,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
     <div class="row q-pa-md items-center justify-between">
       <div class="col-auto">
         <q-breadcrumbs>
-          <q-breadcrumbs-el label="Equipment" to="/equipment" />
+          <q-breadcrumbs-el label="Equipment" to="/dashboard/equipment" />
           <q-breadcrumbs-el :label="equipment?.serialNumber || 'Loading...'" />
         </q-breadcrumbs>
         <h1 class="text-h4 q-mt-sm">Equipment Details</h1>
@@ -18,6 +18,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
             icon="edit"
             label="Edit"
             :loading="loading"
+            :disable="equipmentStatus !== 'AVAILABLE'"
             @click="showEditDialog = true"
           />
           <q-btn
@@ -44,7 +45,7 @@ const isInspector = computed(() => authStore.hasRole(UserRoleType.Inspector));
             icon="build"
             label="Maintenance"
             :loading="loading"
-            :disable="equipmentStatus === 'MAINTENANCE' || equipmentStatus === 'IN_USE'"
+            :disable="equipmentStatus !== 'AVAILABLE'"
             @click="showMaintenanceDialog = true"
           />
         </q-btn-group>
@@ -704,6 +705,8 @@ export default defineComponent({
           type: 'positive',
           message: 'Equipment updated successfully'
         });
+        // Refresh equipment details
+        await loadEquipmentDetails();
       } catch (err) {
         $q.notify({
           type: 'negative',
@@ -740,6 +743,9 @@ export default defineComponent({
           type: 'positive',
           message: 'Equipment assigned successfully'
         });
+        // Refresh equipment details
+        await loadEquipmentDetails();
+        assignmentData.value = {}; // Reset to an empty object
       } catch (err) {
         $q.notify({
           type: 'negative',
@@ -753,20 +759,32 @@ export default defineComponent({
     const handleMaintenanceSubmit = async () => {
       try {
         if (!currentEquipment.value?.id) return;
-
-        // await equipmentStore.sendEquipmentToMaintenance(currentEquipment.value.id, maintenanceData.value);
+        await equipmentStore.processEquipmentMaintenance(currentEquipment.value.id, {
+          maintenanceType: maintenanceData.value.type,
+          technician: maintenanceData.value.technician,
+          notes: maintenanceData.value.notes,
+          equipmentId: currentEquipment.value.id,
+          maintenanceDate: new Date()
+        });
 
         logAction('equipment',
-  currentEquipment.value.id,
-  'maintenance',
-{ maintenanceDetails: maintenanceData.value }
-);
+            currentEquipment.value.id,
+            'maintenance',
+          { maintenanceDetails: maintenanceData.value }
+          );
 
         showMaintenanceDialog.value = false;
         $q.notify({
           type: 'positive',
           message: 'Equipment sent to maintenance successfully'
         });
+        // Refresh equipment details
+        await loadEquipmentDetails();
+        maintenanceData.value = {
+        type: '',
+          technician: '',
+          notes: ''
+        };
       } catch (err) {
         $q.notify({
           type: 'negative',

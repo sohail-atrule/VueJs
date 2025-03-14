@@ -43,7 +43,6 @@
         <q-td :props="props">
           <q-btn-group flat>
             <q-btn
-            :disabled="true"
               v-if="!isInspector"
               flat
               round
@@ -70,7 +69,6 @@
               @click.stop="handleReturnEquipment(props.row)"
             />
             <q-btn
-            :disabled="true"
               v-if="!isInspector"
               flat
               round
@@ -102,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue';
 import { QBtn, QSpinner, QChip, QBtnGroup, QInnerLoading, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import SearchBar from '../common/SearchBar.vue';
@@ -265,7 +263,7 @@ const handleEquipmentSelect = async (evt: Event, row: Equipment) => {
 };
 
 const handleEditEquipment = (equipment: Equipment) => {
-  emit('edit-equipment', equipment);
+   emit('edit-equipment', equipment);
 };
 
 const handleAssignEquipment = (equipment: Equipment) => {
@@ -307,6 +305,12 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+});
+
+
+watchEffect(() => {
+  console.log('Search query changed:', searchQuery.value);
+  equipmentStore.loadEquipment(true, { searchTerm: searchQuery.value });
 });
 
 // Watch for store updates

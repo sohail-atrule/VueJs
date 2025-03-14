@@ -63,7 +63,7 @@
         <!-- Logs Table Panel -->
         <q-tab-panel name="logs">
           <q-table
-            :rows="filteredLogs"
+            :rows="logs"
             :columns="columns"
             :loading="loading"
             row-key="id"
@@ -101,7 +101,7 @@
               <q-card>
                 <q-card-section>
                   <div class="text-h6">Actions by Type</div>
-                  <div class="q-pa-md"> 
+                  <div class="q-pa-md">
                     <div
                       v-for="(count, action) in statistics?.actionByTypes"
                       :key="action"
@@ -268,21 +268,6 @@
   const error = computed(() => auditStore.error);
   const statistics = computed(() => auditStore.statistics);
 
-  const filteredLogs = computed(() => {
-  let filtered = [...logs.value];
-  if (filters.value.search) {
-    const searchTerm = filters.value.search.toLowerCase();
-    filtered = filtered.filter(
-      (log) =>
-        log.entityType.toLowerCase().includes(searchTerm) ||
-        log.action.toLowerCase().includes(searchTerm) ||
-        log.performedBy.toLowerCase().includes(searchTerm)
-    );
-  }
-  return filtered;
-});
-
-
   const entityType = ['USER', 'ROLE', 'PERMISSION', 'EQUIPMENT', 'SYSTEM'];
 
   const action = ['Create', 'Update', 'Delete', 'View', 'Export', 'ogin'];
@@ -300,7 +285,6 @@
     page: pagination.value.page,
     rowsPerPage: pagination.value.rowsPerPage,
   });
-
   pagination.value.rowsNumber = total.value;
 };
 
